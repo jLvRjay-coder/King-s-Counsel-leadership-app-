@@ -32,8 +32,11 @@ const openingMessage: Message = {
     'Bring one leadership matter forward. I will answer with Scripture-aligned counsel, practical application, and disciplined clarity.',
 };
 
-const exploreFurtherPattern =
-  /Would you like to explore this through\s+([A-Za-z]+)\s+or\s+([A-Za-z]+)\?/i;
+const oldExploreFurtherPattern =
+  /Would you like to explore this through\s+([A-Za-z\s-]+)\s+or\s+([A-Za-z\s-]+)\?/i;
+
+const newExploreFurtherPattern =
+  /Would you like to explore how\s+(.+?)\s+applies to this leadership lesson\?/gi;
 
 function createId() {
   if ('crypto' in window && typeof window.crypto.randomUUID === 'function') {
@@ -44,12 +47,23 @@ function createId() {
 }
 
 function extractFollowUpOptions(content: string): FollowUpOptions | null {
-  const match = content.match(exploreFurtherPattern);
-  if (!match) return null;
+  const newFormatMatches = [...content.matchAll(newExploreFurtherPattern)]
+    .map((match) => match[1]?.trim())
+    .filter((option): option is string => Boolean(option));
+
+  if (newFormatMatches.length >= 2) {
+    return {
+      optionA: newFormatMatches[0],
+      optionB: newFormatMatches[1],
+    };
+  }
+
+  const oldFormatMatch = content.match(oldExploreFurtherPattern);
+  if (!oldFormatMatch) return null;
 
   return {
-    optionA: match[1],
-    optionB: match[2],
+    optionA: oldFormatMatch[1].trim(),
+    optionB: oldFormatMatch[2].trim(),
   };
 }
 
@@ -103,16 +117,21 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
 
       const data = (await response.json()) as CounselApiResponse;
 
-      if (!response.ok || !data.answer) {
+      if (!response.ok) {
         throw new Error(data.error || 'Counsel response failed.');
       }
+
+      const assistantAnswer =
+        typeof data.answer === 'string' && data.answer.trim().length > 0
+          ? data.answer.trim()
+          : 'I was unable to generate counsel for that question. Please try again.';
 
       setMessages((current) => [
         ...current,
         {
           id: createId(),
           role: 'assistant',
-          content: data.answer,
+          content: assistantAnswer,
         },
       ]);
     } catch (error) {
@@ -148,7 +167,7 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
   };
 
   const handleFollowUpClick = (option: string) => {
-    void sendMessage(`Explore this principle through the lens of ${option}.`);
+    void sendMessage(`Explore how ${option} applies to this leadership lesson.`);
   };
 
   return (
