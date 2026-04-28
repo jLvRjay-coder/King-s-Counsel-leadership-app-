@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, SendHorizontal } from 'lucide-react';
 import { SendToSelfButtons } from './SendToSelfButtons';
 
@@ -8,6 +8,11 @@ type Message = {
   id: string;
   role: MessageRole;
   content: string;
+};
+
+type FollowUpOptions = {
+  optionA: string;
+  optionB: string;
 };
 
 type ChatPanelProps = {
@@ -27,6 +32,9 @@ const openingMessage: Message = {
     'Bring one leadership matter forward. I will answer with Scripture-aligned counsel, practical application, and disciplined clarity.',
 };
 
+const exploreFurtherPattern =
+  /Would you like to explore this through\s+([A-Za-z]+)\s+or\s+([A-Za-z]+)\?/i;
+
 function createId() {
   if ('crypto' in window && typeof window.crypto.randomUUID === 'function') {
     return window.crypto.randomUUID();
@@ -35,12 +43,32 @@ function createId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function extractFollowUpOptions(content: string): FollowUpOptions | null {
+  const match = content.match(exploreFurtherPattern);
+  if (!match) return null;
+
+  return {
+    optionA: match[1],
+    optionB: match[2],
+  };
+}
+
 export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([openingMessage]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const handledPromptRef = useRef('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const latestAssistantMessage = useMemo(
+    () => [...messages].reverse().find((message) => message.role === 'assistant'),
+    [messages],
+  );
+
+  const latestFollowUpOptions = useMemo(() => {
+    if (!latestAssistantMessage || latestAssistantMessage.id === openingMessage.id) return null;
+    return extractFollowUpOptions(latestAssistantMessage.content);
+  }, [latestAssistantMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -75,9 +103,7 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
 
       const data = (await response.json()) as CounselApiResponse;
 
-      const answer = typeof data.answer === 'string' ? data.answer.trim() : '';
-
-      if (!response.ok || !answer) {
+      if (!response.ok || !data.answer) {
         throw new Error(data.error || 'Counsel response failed.');
       }
 
@@ -86,7 +112,7 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
         {
           id: createId(),
           role: 'assistant',
-          content: answer,
+          content: data.answer,
         },
       ]);
     } catch (error) {
@@ -121,9 +147,9 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
     void sendMessage(input);
   };
 
-  const latestAssistantMessage = [...messages]
-    .reverse()
-    .find((message) => message.role === 'assistant');
+  const handleFollowUpClick = (option: string) => {
+    void sendMessage(`Explore this principle through the lens of ${option}.`);
+  };
 
   return (
     <section className="chat-shell" aria-labelledby="chat-title">
@@ -131,20 +157,45 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
         <span className="section-label">Ask Counsel</span>
         <h1 id="chat-title">Seek counsel before you move.</h1>
         <p>
-          This is not a replacement for prayer, Scripture, or wise local counsel. It is a
-          disciplined aid for leadership clarity.
+          This is not a replacement for prayer, Scripture, or wise local counsel. It is a disciplined aid for leadership clarity.
         </p>
       </div>
 
       <div className="message-list" aria-live="polite">
-        {messages.map((message) => (
-          <article key={message.id} className={`message-row ${message.role}`}>
-            <div className="message-bubble">
-              <span>{message.role === 'assistant' ? 'Counsel' : 'You'}</span>
-              <p>{message.content}</p>
-            </div>
-          </article>
-        ))}
+        {messages.map((message) => {
+          const followUpOptions =
+            message.role === 'assistant' && message.id === latestAssistantMessage?.id
+              ? latestFollowUpOptions
+              : null;
+
+          return (
+            <article key={message.id} className={`message-row ${message.role}`}>
+              <div className="message-bubble">
+                <span>{message.role === 'assistant' ? 'Counsel' : 'You'}</span>
+                <p>{message.content}</p>
+
+                {followUpOptions && (
+                  <div className="follow-up-chips" aria-label="Explore further options">
+                    <button
+                      type="button"
+                      onClick={() => handleFollowUpClick(followUpOptions.optionA)}
+                      disabled={isLoading}
+                    >
+                      {followUpOptions.optionA}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFollowUpClick(followUpOptions.optionB)}
+                      disabled={isLoading}
+                    >
+                      {followUpOptions.optionB}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          );
+        })}
 
         {isLoading && (
           <article className="message-row assistant">
@@ -154,7 +205,6 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
             </div>
           </article>
         )}
-
         <div ref={messagesEndRef} />
       </div>
 
@@ -162,7 +212,6 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
         <label className="sr-only" htmlFor="counsel-input">
           What do you need counsel on?
         </label>
-
         <input
           id="counsel-input"
           value={input}
@@ -171,7 +220,6 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
           autoComplete="off"
           disabled={isLoading}
         />
-
         <button type="submit" disabled={isLoading || !input.trim()} aria-label="Send question">
           {isLoading ? <Loader2 className="spin" size={18} /> : <SendHorizontal size={18} />}
         </button>
