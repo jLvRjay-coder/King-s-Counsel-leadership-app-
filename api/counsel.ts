@@ -18,55 +18,66 @@ type OpenAIResponse = {
   };
 };
 
-const SYSTEM_PROMPT = `You are The King's Counsel, a Scripture-grounded leadership advisor.
+const APPROVED_LENSES = [
+  'Influence',
+  'Integrity',
+  'Courage',
+  'Stewardship',
+  'Discipline',
+  'Vision',
+  'Humility',
+  'Obedience',
+] as const;
 
-Your role is to give concise, disciplined leadership counsel rooted in Biblical truth.
+const SYSTEM_PROMPT = `You are a Biblical leadership advisor for The King's Counsel.
 
-Tone:
-- Calm
-- Authoritative
-- Direct
-- Scripture-first
-- Masculine but not harsh
-- Practical for leaders
-- Executive-level clarity, not devotional fluff
+Your voice should feel like Scripture-first leadership commentary in the spirit of a Maxwell Leadership Bible study note, but do not directly quote or imitate copyrighted commentary.
 
-Important UI rule:
-The app interface already labels your response as "Counsel."
-Do NOT begin your response with the word "Counsel."
-Do NOT repeat the heading "Counsel."
+Every answer must align with Scripture using KJV/NKJV-grounded references.
+Do not contradict Biblical truth.
+Do not drift into generic self-help, therapy language, or motivational fluff.
+Be concise, principle-driven, practical, and application-focused.
+Keep the full response under 240 words unless the user explicitly asks to go deeper.
 
-Response format:
-Start immediately with 2-3 strong sentences answering the user's question directly.
+RESPONSE STRUCTURE:
 
-Then use exactly these three headings:
+1. Direct Counsel
+Start immediately with 2-3 strong sentences.
+Do not print the heading "Counsel" because the UI already labels the assistant message.
 
-Scripture Anchors
-- List 2-3 Bible references only.
-- Do not quote full verses unless the user asks.
+2. Scripture Anchors
+Use this exact heading: Scripture Anchors
+List 2-4 Bible references only.
+Do not quote full verses unless a verified Bible source is available.
+Use KJV or NKJV-aligned references.
 
-Leadership Application
-Give 1 short paragraph, no more than 3 sentences.
-Apply the truth to leadership, responsibility, discipline, humility, courage, stewardship, or decision-making.
+3. Leadership Principle
+Use this exact heading: Leadership Principle
+Write one concise principle statement that turns the answer into a leadership rule.
+Do not use the phrase "Next Step."
 
-Next Step
-Give one clear action the leader should take today.
-Make it direct and specific.
+4. Apply This Today
+Use this exact heading: Apply This Today
+Give one direct, practical action.
 
-Rules:
-- Keep the full answer under 220 words unless the user asks to go deeper.
-- Do not sound like a generic chatbot.
-- Do not write long essays.
-- Do not use phrases like "Short answer."
-- Do not over-list references.
-- Do not give motivational fluff.
-- Align with Scripture.
-- You may include curated leadership interpretation, but never contradict Biblical truth.
-- If the user's question is vague, answer briefly and invite them to name the specific decision or situation.`;
+5. Explore Further
+Use this exact heading: Explore Further
+End with exactly one static follow-up question in this format:
+Would you like to explore this through [Option A] or [Option B]?
 
-const DEFAULT_MODEL = 'gpt-5-mini';
+The two options must come only from this approved list:
+Influence, Integrity, Courage, Stewardship, Discipline, Vision, Humility, Obedience.
+
+Select the two most relevant options for the user's topic.`;
+
+const DEFAULT_MODEL = 'gpt-5.4-mini';
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_MESSAGES = 8;
+
+// Future Scripture API preparation:
+// A public-domain/free-use Bible API can be connected here later to render verified Scripture text.
+// For now, responses only provide references unless verified Scripture rendering is implemented.
+const SCRIPTURE_RENDERING_MODE = 'references_only' as const;
 
 function parseMessages(body: unknown): ClientMessage[] {
   if (!body || typeof body !== 'object' || !('messages' in body)) return [];
@@ -77,9 +88,7 @@ function parseMessages(body: unknown): ClientMessage[] {
   return messages
     .filter((message): message is ClientMessage => {
       if (!message || typeof message !== 'object') return false;
-
       const candidate = message as Partial<ClientMessage>;
-
       return (
         (candidate.role === 'user' || candidate.role === 'assistant') &&
         typeof candidate.content === 'string' &&
@@ -114,14 +123,25 @@ function extractAnswer(data: OpenAIResponse) {
   return text || '';
 }
 
-function resolveModel() {
-  const configuredModel = process.env.OPENAI_MODEL?.trim();
+function enforceApprovedExploreOptions(answer: string) {
+  const exploreLinePattern =
+    /Would you like to explore this through\s+([A-Za-z]+)\s+or\s+([A-Za-z]+)\?/i;
 
-  if (!configuredModel || configuredModel === 'gpt-5.4-mini') {
-    return DEFAULT_MODEL;
-  }
+  const match = answer.match(exploreLinePattern);
+  if (!match) return answer;
 
-  return configuredModel;
+  const optionA = match[1];
+  const optionB = match[2];
+
+  const optionAApproved = APPROVED_LENSES.includes(optionA as (typeof APPROVED_LENSES)[number]);
+  const optionBApproved = APPROVED_LENSES.includes(optionB as (typeof APPROVED_LENSES)[number]);
+
+  if (optionAApproved && optionBApproved) return answer;
+
+  return answer.replace(
+    exploreLinePattern,
+    'Would you like to explore this through Influence or Integrity?',
+  );
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -132,7 +152,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
-
   if (!apiKey) {
     return res.status(500).json({ error: 'OPENAI_API_KEY is not configured.' });
   }
@@ -145,55 +164,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const transcript = buildTranscript(messages);
-  const model = resolveModel();
+  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
-  try {
-    const response = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        instructions: SYSTEM_PROMPT,
-        input: `Use the conversation below to answer the leader's latest question.
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      instructions: SYSTEM_PROMPT,
+      input: `Use the conversation below to answer the leader's latest question.
 
-Stay concise.
-Stay structured.
-Stay Scripture-aligned.
-Stay practical.
-Do not begin with the heading "Counsel."
-Do not produce long Bible-study essays unless the leader asks to go deeper.
+Current Scripture rendering mode: ${SCRIPTURE_RENDERING_MODE}.
+Do not quote full Bible verses unless verified rendering is available.
+Follow the required structure exactly.
 
-Conversation:
 ${transcript}`,
-        reasoning: { effort: 'low' },
-        max_output_tokens: 450,
-        store: false,
-      }),
-    });
+      reasoning: { effort: 'low' },
+      max_output_tokens: 650,
+      store: false,
+    }),
+  });
 
-    const data = (await response.json()) as OpenAIResponse;
+  const data = (await response.json()) as OpenAIResponse;
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: data.error?.message || 'OpenAI request failed.',
-      });
-    }
-
-    const answer = extractAnswer(data);
-
-    if (!answer) {
-      return res.status(502).json({ error: 'No counsel text was returned.' });
-    }
-
-    return res.status(200).json({ answer });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown server error.';
-
-    return res.status(500).json({
-      error: `Counsel service failed. ${message}`,
+  if (!response.ok) {
+    return res.status(response.status).json({
+      error: data.error?.message || 'OpenAI request failed.',
     });
   }
+
+  const answer = enforceApprovedExploreOptions(extractAnswer(data));
+
+  if (!answer) {
+    return res.status(502).json({ error: 'No counsel text was returned.' });
+  }
+
+  return res.status(200).json({ answer });
 }
