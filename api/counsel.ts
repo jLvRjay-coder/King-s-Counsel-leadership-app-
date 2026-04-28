@@ -18,7 +18,7 @@ type OpenAIResponse = {
   };
 };
 
-const APPROVED_LENSES = [
+const APPROVED_FOLLOW_UP_TOPICS = [
   'Influence',
   'Integrity',
   'Courage',
@@ -27,64 +27,92 @@ const APPROVED_LENSES = [
   'Vision',
   'Humility',
   'Obedience',
+  'Wisdom Under Pressure',
+  'Decision-Making',
+  'Spiritual Maturity',
+  'Counting the Cost',
 ] as const;
 
-const SYSTEM_PROMPT = `You are the Ask Counsel response engine for The King's Counsel, a Scripture-grounded leadership operating system.
+const DEFAULT_FOLLOW_UP_A = 'Integrity';
+const DEFAULT_FOLLOW_UP_B = 'Wisdom Under Pressure';
+
+const SYSTEM_PROMPT = `You are the Ask Counsel response engine for The King's Counsel, a Scripture-grounded leadership app.
 
 You are not a generic Bible chatbot.
 You are not a motivational speaker.
-You are not writing long devotionals.
+You are not writing a long devotional.
+You are not giving vague encouragement.
 
-Your role is to give concise, disciplined, Scripture-first leadership counsel in the style and purpose of leadership study notes. You may use a Maxwell Study Bible style as a FORMAT example for concise leadership principles, but do not imitate, quote, or reproduce copyrighted commentary.
+Your role is to answer the leader's question with concise, Scripture-first leadership counsel in a Maxwell Study Bible-style FORMAT:
+- clear counsel
+- Scripture anchors
+- leadership principle
+- practical application
+- next-step exploration
+
+Do not quote, imitate, or reproduce copyrighted commentary.
+Use the Maxwell Study Bible only as a FORMAT inspiration for concise leadership principles.
 
 Every response MUST follow this exact format:
 
-[Direct counsel paragraph — 2 to 3 sentences only. No heading.]
+Counsel on [Topic]
+
+[Direct counsel paragraph. 2 to 3 sentences only. No more than 70 words.]
 
 Scripture Anchors
-- Book Chapter:Verse
-- Book Chapter:Verse
-- Book Chapter:Verse
+- Book Chapter:Verse NKJV — "Exact NKJV verse text."
+- Book Chapter:Verse NKJV — "Exact NKJV verse text."
 
-Leadership Principle
-One sentence only. Make it sound like a leadership rule.
-
-Apply This Today
-One practical action only.
+Practical Leadership Lesson
+[One practical leadership lesson tied directly to the counsel and Scripture. 2 to 4 sentences only.]
 
 Explore Further
-Would you like to explore this through [Option A] or [Option B]?
+Would you like to explore how [Option A] applies to this leadership lesson?
+Would you like to explore how [Option B] applies to this leadership lesson?
 
-STRICT RULES:
-- Do not include the heading "Counsel."
-- The opening direct counsel paragraph must be 2 to 3 sentences only.
-- Scripture Anchors must include 2 to 3 complete Bible references only.
-- Scripture Anchors must always include full references in this pattern: Book Chapter:Verse.
-- Never output book names only.
+STRICT FORMAT RULES:
+- The first line must begin with: Counsel on
+- Do not use the heading "Leadership Principle."
+- Use the heading "Practical Leadership Lesson."
+- Scripture Anchors must include exactly 2 bullet points.
+- Each Scripture Anchor must include:
+  1. Full Bible reference
+  2. NKJV label
+  3. Exact verse text in quotation marks
 - Never output incomplete references.
+- Never output book names only.
 - Never output partial anchors like "- Hebrews" or "- Proverbs."
-- If you cannot provide a full Scripture reference, omit it and choose a different complete reference.
-- Do not quote full verses unless verified Bible rendering is available.
-- Leadership Principle must be exactly one sentence.
-- Apply This Today must be exactly one practical action.
-- Explore Further must be exactly one question.
-- Explore Further options must come only from this list: Influence, Integrity, Courage, Stewardship, Discipline, Vision, Humility, Obedience.
-- Keep the total response under 180 words.
+- Never invent a Bible reference.
+- Use only one verse per anchor unless the leader specifically asks for a passage.
+- Keep quoted NKJV text brief. Prefer shorter verses when possible.
+- If exact NKJV wording is uncertain, choose a different Scripture you can render accurately.
+- Practical Leadership Lesson must be tied to leadership, not only personal devotion.
+- Explore Further must include exactly two questions.
+- Explore Further questions must use this exact structure:
+  Would you like to explore how [Option] applies to this leadership lesson?
+- Explore Further options should come from this list:
+  Influence, Integrity, Courage, Stewardship, Discipline, Vision, Humility, Obedience, Wisdom Under Pressure, Decision-Making, Spiritual Maturity, Counting the Cost.
+- Keep the total response under 260 words.
 - Avoid generic motivational language.
 - Avoid long essays unless the user explicitly asks to go deeper.
-- Every answer must align with KJV/NKJV-grounded Biblical truth.`;
+- Every answer must align with KJV/NKJV-grounded Biblical truth.
+
+CONTENT RULES:
+- If the leader asks for a meaning, define it in the leadership context.
+- If the leader asks about a virtue, explain how that virtue operates in leadership.
+- If the leader asks a practical question, answer directly before teaching.
+- Tie the counsel back to the current lesson when context is available.
+- Sound like a wise leadership mentor, not a sermon generator.`;
 
 const DEFAULT_MODEL = 'gpt-5.4-mini';
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_MESSAGES = 8;
 
-// Future Scripture API preparation:
-// A public-domain/free-use Bible API can be connected here later to render verified Scripture text.
-// For now, responses only provide complete Scripture references unless verified Scripture rendering is implemented.
-const SCRIPTURE_RENDERING_MODE = 'references_only' as const;
+const COMPLETE_NKJV_ANCHOR_PATTERN =
+  /^-\s*(?:[1-3]\s*)?[A-Z][A-Za-z]+(?:\s(?:of\s)?[A-Z][A-Za-z]+)*\s\d{1,3}:\d{1,3}(?:-\d{1,3})?\s+NKJV\s+[—-]\s+["“].+["”]\.?$/;
 
-const COMPLETE_REFERENCE_PATTERN =
-  /\b(?:[1-3]\s*)?[A-Z][a-z]+(?:\s(?:of\s)?[A-Z][a-z]+)*\s\d{1,3}:\d{1,3}(?:-\d{1,3})?\b/;
+const FOLLOW_UP_PATTERN =
+  /^Would you like to explore how (.+?) applies to this leadership lesson\?$/i;
 
 function parseMessages(body: unknown): ClientMessage[] {
   if (!body || typeof body !== 'object' || !('messages' in body)) return [];
@@ -130,41 +158,37 @@ function extractAnswer(data: OpenAIResponse) {
   return text || '';
 }
 
-function enforceApprovedExploreOptions(answer: string) {
-  const exploreLinePattern =
-    /Would you like to explore this through\s+([A-Za-z]+)\s+or\s+([A-Za-z]+)\?/i;
+function cleanAnswer(answer: string) {
+  return answer
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 
-  const match = answer.match(exploreLinePattern);
-  if (!match) return answer;
+function getSection(answer: string, startHeading: string, endHeading?: string) {
+  const startIndex = answer.indexOf(startHeading);
+  if (startIndex === -1) return '';
 
-  const optionA = match[1];
-  const optionB = match[2];
+  const sectionStart = startIndex + startHeading.length;
+  const sectionEnd = endHeading ? answer.indexOf(endHeading, sectionStart) : answer.length;
 
-  const optionAApproved = APPROVED_LENSES.includes(optionA as (typeof APPROVED_LENSES)[number]);
-  const optionBApproved = APPROVED_LENSES.includes(optionB as (typeof APPROVED_LENSES)[number]);
-
-  if (optionAApproved && optionBApproved) return answer;
-
-  return answer.replace(
-    exploreLinePattern,
-    'Would you like to explore this through Influence or Integrity?',
-  );
+  return answer
+    .slice(sectionStart, sectionEnd === -1 ? answer.length : sectionEnd)
+    .trim();
 }
 
 function hasRequiredSections(answer: string) {
   return (
-    answer.includes('Scripture Anchors') &&
-    answer.includes('Leadership Principle') &&
-    answer.includes('Apply This Today') &&
-    answer.includes('Explore Further')
+    answer.startsWith('Counsel on ') &&
+    answer.includes('\n\nScripture Anchors') &&
+    answer.includes('\n\nPractical Leadership Lesson') &&
+    answer.includes('\n\nExplore Further')
   );
 }
 
 function hasValidScriptureAnchors(answer: string) {
-  const scriptureSection = answer
-    .split('Scripture Anchors')[1]
-    ?.split('Leadership Principle')[0]
-    ?.trim();
+  const scriptureSection = getSection(answer, 'Scripture Anchors', 'Practical Leadership Lesson');
 
   if (!scriptureSection) return false;
 
@@ -173,22 +197,45 @@ function hasValidScriptureAnchors(answer: string) {
     .map((line) => line.trim())
     .filter((line) => line.startsWith('-'));
 
-  if (anchorLines.length < 2 || anchorLines.length > 3) return false;
+  if (anchorLines.length !== 2) return false;
 
-  return anchorLines.every((line) => COMPLETE_REFERENCE_PATTERN.test(line));
+  return anchorLines.every((line) => COMPLETE_NKJV_ANCHOR_PATTERN.test(line));
 }
 
 function hasValidExploreFurther(answer: string) {
-  const exploreLinePattern =
-    /Would you like to explore this through\s+([A-Za-z]+)\s+or\s+([A-Za-z]+)\?/i;
+  const exploreSection = getSection(answer, 'Explore Further');
 
-  const match = answer.match(exploreLinePattern);
-  if (!match) return false;
+  if (!exploreSection) return false;
 
-  return (
-    APPROVED_LENSES.includes(match[1] as (typeof APPROVED_LENSES)[number]) &&
-    APPROVED_LENSES.includes(match[2] as (typeof APPROVED_LENSES)[number])
-  );
+  const followUpLines = exploreSection
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (followUpLines.length !== 2) return false;
+
+  return followUpLines.every((line) => {
+    const match = line.match(FOLLOW_UP_PATTERN);
+    if (!match) return false;
+
+    const topic = match[1].trim();
+
+    return APPROVED_FOLLOW_UP_TOPICS.includes(
+      topic as (typeof APPROVED_FOLLOW_UP_TOPICS)[number],
+    );
+  });
+}
+
+function enforceStaticExploreFurther(answer: string) {
+  const exploreReplacement = `Explore Further
+Would you like to explore how ${DEFAULT_FOLLOW_UP_A} applies to this leadership lesson?
+Would you like to explore how ${DEFAULT_FOLLOW_UP_B} applies to this leadership lesson?`;
+
+  if (!answer.includes('Explore Further')) {
+    return `${answer.trim()}\n\n${exploreReplacement}`;
+  }
+
+  return answer.replace(/Explore Further[\s\S]*$/i, exploreReplacement).trim();
 }
 
 function responseNeedsRepair(answer: string) {
@@ -213,29 +260,50 @@ async function requestCounsel({
   const input = repairTarget
     ? `Repair the response below so it follows the required format exactly.
 
-Do not add explanation.
-Do not include the heading "Counsel."
-Keep the total response under 180 words.
-Scripture Anchors must include 2 to 3 complete references only in this format: Book Chapter:Verse.
-If you cannot provide a full Scripture reference, omit it and choose a different complete reference.
-Do not quote full verses unless verified rendering is available.
-Leadership Principle must appear.
-Apply This Today must appear.
-Explore Further must appear.
+Do not explain the repair.
+Do not apologize.
+Do not add extra notes.
+
+Required format:
+
+Counsel on [Topic]
+
+[Direct counsel paragraph. 2 to 3 sentences only. No more than 70 words.]
+
+Scripture Anchors
+- Book Chapter:Verse NKJV — "Exact NKJV verse text."
+- Book Chapter:Verse NKJV — "Exact NKJV verse text."
+
+Practical Leadership Lesson
+[One practical leadership lesson tied directly to the counsel and Scripture. 2 to 4 sentences only.]
+
+Explore Further
+Would you like to explore how ${DEFAULT_FOLLOW_UP_A} applies to this leadership lesson?
+Would you like to explore how ${DEFAULT_FOLLOW_UP_B} applies to this leadership lesson?
+
+Repair rules:
+- First line must begin with "Counsel on".
+- Scripture Anchors must include exactly 2 complete NKJV anchors with verse text.
+- Do not output incomplete references.
+- Do not output book names only.
+- Keep total response under 260 words.
+- Explore Further must use the two static follow-ups exactly as written above.
 
 Original conversation:
 ${transcript}
 
 Broken response:
 ${repairTarget}`
-    : `Use the conversation below to answer the leader's latest question.
+    : `Answer the leader's latest question using the conversation context below.
 
-Current Scripture rendering mode: ${SCRIPTURE_RENDERING_MODE}.
-Do not quote full Bible verses unless verified rendering is available.
-If you cannot provide a full Scripture reference, omit it and choose a different complete reference.
 Follow the required format exactly.
-Keep the total response under 180 words.
+Keep the total response under 260 words.
+Use exactly two Scripture Anchors with NKJV verse text.
+Use the two static Explore Further questions exactly:
+Would you like to explore how ${DEFAULT_FOLLOW_UP_A} applies to this leadership lesson?
+Would you like to explore how ${DEFAULT_FOLLOW_UP_B} applies to this leadership lesson?
 
+Conversation:
 ${transcript}`;
 
   const response = await fetch('https://api.openai.com/v1/responses', {
@@ -249,7 +317,7 @@ ${transcript}`;
       instructions: SYSTEM_PROMPT,
       input,
       reasoning: { effort: 'low' },
-      max_output_tokens: 520,
+      max_output_tokens: 700,
       store: false,
     }),
   });
@@ -260,7 +328,7 @@ ${transcript}`;
     ok: response.ok,
     status: response.status,
     data,
-    answer: enforceApprovedExploreOptions(extractAnswer(data)),
+    answer: cleanAnswer(enforceStaticExploreFurther(extractAnswer(data))),
   };
 }
 
@@ -312,6 +380,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       answer = repairedAttempt.answer;
     }
   }
+
+  answer = cleanAnswer(enforceStaticExploreFurther(answer));
 
   if (!answer) {
     return res.status(502).json({ error: 'No counsel text was returned.' });
