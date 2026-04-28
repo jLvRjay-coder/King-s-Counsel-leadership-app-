@@ -29,46 +29,50 @@ const APPROVED_LENSES = [
   'Obedience',
 ] as const;
 
-const SYSTEM_PROMPT = `You are a Biblical leadership advisor for The King's Counsel.
+const SYSTEM_PROMPT = `You are the Ask Counsel response engine for The King's Counsel, a Scripture-grounded leadership operating system.
 
-Your voice should feel like Scripture-first leadership commentary in the spirit of a Maxwell Leadership Bible study note, but do not directly quote or imitate copyrighted commentary.
+You are not a generic Bible chatbot.
+You are not a motivational speaker.
+You are not writing long devotionals.
 
-Every answer must align with Scripture using KJV/NKJV-grounded references.
-Do not contradict Biblical truth.
-Do not drift into generic self-help, therapy language, or motivational fluff.
-Be concise, principle-driven, practical, and application-focused.
-Keep the full response under 240 words unless the user explicitly asks to go deeper.
+Your role is to give concise, disciplined, Scripture-first leadership counsel in the style and purpose of leadership study notes. You may use a Maxwell Study Bible style as a FORMAT example for concise leadership principles, but do not imitate, quote, or reproduce copyrighted commentary.
 
-RESPONSE STRUCTURE:
+Every response MUST follow this exact format:
 
-1. Direct Counsel
-Start immediately with 2-3 strong sentences.
-Do not print the heading "Counsel" because the UI already labels the assistant message.
+[Direct counsel paragraph — 2 to 3 sentences only. No heading.]
 
-2. Scripture Anchors
-Use this exact heading: Scripture Anchors
-List 2-4 Bible references only.
-Do not quote full verses unless a verified Bible source is available.
-Use KJV or NKJV-aligned references.
+Scripture Anchors
+- Book Chapter:Verse
+- Book Chapter:Verse
+- Book Chapter:Verse
 
-3. Leadership Principle
-Use this exact heading: Leadership Principle
-Write one concise principle statement that turns the answer into a leadership rule.
-Do not use the phrase "Next Step."
+Leadership Principle
+One sentence only. Make it sound like a leadership rule.
 
-4. Apply This Today
-Use this exact heading: Apply This Today
-Give one direct, practical action.
+Apply This Today
+One practical action only.
 
-5. Explore Further
-Use this exact heading: Explore Further
-End with exactly one static follow-up question in this format:
+Explore Further
 Would you like to explore this through [Option A] or [Option B]?
 
-The two options must come only from this approved list:
-Influence, Integrity, Courage, Stewardship, Discipline, Vision, Humility, Obedience.
-
-Select the two most relevant options for the user's topic.`;
+STRICT RULES:
+- Do not include the heading "Counsel."
+- The opening direct counsel paragraph must be 2 to 3 sentences only.
+- Scripture Anchors must include 2 to 3 complete Bible references only.
+- Scripture Anchors must always include full references in this pattern: Book Chapter:Verse.
+- Never output book names only.
+- Never output incomplete references.
+- Never output partial anchors like "- Hebrews" or "- Proverbs."
+- If you cannot provide a full Scripture reference, omit it and choose a different complete reference.
+- Do not quote full verses unless verified Bible rendering is available.
+- Leadership Principle must be exactly one sentence.
+- Apply This Today must be exactly one practical action.
+- Explore Further must be exactly one question.
+- Explore Further options must come only from this list: Influence, Integrity, Courage, Stewardship, Discipline, Vision, Humility, Obedience.
+- Keep the total response under 180 words.
+- Avoid generic motivational language.
+- Avoid long essays unless the user explicitly asks to go deeper.
+- Every answer must align with KJV/NKJV-grounded Biblical truth.`;
 
 const DEFAULT_MODEL = 'gpt-5.4-mini';
 const MAX_MESSAGE_LENGTH = 2000;
@@ -76,8 +80,11 @@ const MAX_MESSAGES = 8;
 
 // Future Scripture API preparation:
 // A public-domain/free-use Bible API can be connected here later to render verified Scripture text.
-// For now, responses only provide references unless verified Scripture rendering is implemented.
+// For now, responses only provide complete Scripture references unless verified Scripture rendering is implemented.
 const SCRIPTURE_RENDERING_MODE = 'references_only' as const;
+
+const COMPLETE_REFERENCE_PATTERN =
+  /\b(?:[1-3]\s*)?[A-Z][a-z]+(?:\s(?:of\s)?[A-Z][a-z]+)*\s\d{1,3}:\d{1,3}(?:-\d{1,3})?\b/;
 
 function parseMessages(body: unknown): ClientMessage[] {
   if (!body || typeof body !== 'object' || !('messages' in body)) return [];
@@ -144,6 +151,119 @@ function enforceApprovedExploreOptions(answer: string) {
   );
 }
 
+function hasRequiredSections(answer: string) {
+  return (
+    answer.includes('Scripture Anchors') &&
+    answer.includes('Leadership Principle') &&
+    answer.includes('Apply This Today') &&
+    answer.includes('Explore Further')
+  );
+}
+
+function hasValidScriptureAnchors(answer: string) {
+  const scriptureSection = answer
+    .split('Scripture Anchors')[1]
+    ?.split('Leadership Principle')[0]
+    ?.trim();
+
+  if (!scriptureSection) return false;
+
+  const anchorLines = scriptureSection
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('-'));
+
+  if (anchorLines.length < 2 || anchorLines.length > 3) return false;
+
+  return anchorLines.every((line) => COMPLETE_REFERENCE_PATTERN.test(line));
+}
+
+function hasValidExploreFurther(answer: string) {
+  const exploreLinePattern =
+    /Would you like to explore this through\s+([A-Za-z]+)\s+or\s+([A-Za-z]+)\?/i;
+
+  const match = answer.match(exploreLinePattern);
+  if (!match) return false;
+
+  return (
+    APPROVED_LENSES.includes(match[1] as (typeof APPROVED_LENSES)[number]) &&
+    APPROVED_LENSES.includes(match[2] as (typeof APPROVED_LENSES)[number])
+  );
+}
+
+function responseNeedsRepair(answer: string) {
+  return (
+    !hasRequiredSections(answer) ||
+    !hasValidScriptureAnchors(answer) ||
+    !hasValidExploreFurther(answer)
+  );
+}
+
+async function requestCounsel({
+  apiKey,
+  model,
+  transcript,
+  repairTarget,
+}: {
+  apiKey: string;
+  model: string;
+  transcript: string;
+  repairTarget?: string;
+}) {
+  const input = repairTarget
+    ? `Repair the response below so it follows the required format exactly.
+
+Do not add explanation.
+Do not include the heading "Counsel."
+Keep the total response under 180 words.
+Scripture Anchors must include 2 to 3 complete references only in this format: Book Chapter:Verse.
+If you cannot provide a full Scripture reference, omit it and choose a different complete reference.
+Do not quote full verses unless verified rendering is available.
+Leadership Principle must appear.
+Apply This Today must appear.
+Explore Further must appear.
+
+Original conversation:
+${transcript}
+
+Broken response:
+${repairTarget}`
+    : `Use the conversation below to answer the leader's latest question.
+
+Current Scripture rendering mode: ${SCRIPTURE_RENDERING_MODE}.
+Do not quote full Bible verses unless verified rendering is available.
+If you cannot provide a full Scripture reference, omit it and choose a different complete reference.
+Follow the required format exactly.
+Keep the total response under 180 words.
+
+${transcript}`;
+
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      instructions: SYSTEM_PROMPT,
+      input,
+      reasoning: { effort: 'low' },
+      max_output_tokens: 520,
+      store: false,
+    }),
+  });
+
+  const data = (await response.json()) as OpenAIResponse;
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data,
+    answer: enforceApprovedExploreOptions(extractAnswer(data)),
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -166,37 +286,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const transcript = buildTranscript(messages);
   const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
 
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      instructions: SYSTEM_PROMPT,
-      input: `Use the conversation below to answer the leader's latest question.
-
-Current Scripture rendering mode: ${SCRIPTURE_RENDERING_MODE}.
-Do not quote full Bible verses unless verified rendering is available.
-Follow the required structure exactly.
-
-${transcript}`,
-      reasoning: { effort: 'low' },
-      max_output_tokens: 650,
-      store: false,
-    }),
+  const firstAttempt = await requestCounsel({
+    apiKey,
+    model,
+    transcript,
   });
 
-  const data = (await response.json()) as OpenAIResponse;
-
-  if (!response.ok) {
-    return res.status(response.status).json({
-      error: data.error?.message || 'OpenAI request failed.',
+  if (!firstAttempt.ok) {
+    return res.status(firstAttempt.status).json({
+      error: firstAttempt.data.error?.message || 'OpenAI request failed.',
     });
   }
 
-  const answer = enforceApprovedExploreOptions(extractAnswer(data));
+  let answer = firstAttempt.answer;
+
+  if (answer && responseNeedsRepair(answer)) {
+    const repairedAttempt = await requestCounsel({
+      apiKey,
+      model,
+      transcript,
+      repairTarget: answer,
+    });
+
+    if (repairedAttempt.ok && repairedAttempt.answer) {
+      answer = repairedAttempt.answer;
+    }
+  }
 
   if (!answer) {
     return res.status(502).json({ error: 'No counsel text was returned.' });
