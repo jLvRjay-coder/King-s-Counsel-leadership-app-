@@ -25,6 +25,20 @@ type CounselApiResponse = {
   error?: string;
 };
 
+type ScriptureAnchor = {
+  reference: string;
+  text: string;
+};
+
+type ParsedCounselResponse = {
+  title: string;
+  counsel: string;
+  scriptureAnchors: ScriptureAnchor[];
+  leadershipPrinciple: string;
+  practicalApplication: string;
+  exploreOptions: string[];
+};
+
 const openingMessage: Message = {
   id: 'opening-counsel',
   role: 'assistant',
@@ -35,8 +49,26 @@ const openingMessage: Message = {
 const oldExploreFurtherPattern =
   /Would you like to explore this through\s+([A-Za-z\s-]+)\s+or\s+([A-Za-z\s-]+)\?/i;
 
-const newExploreFurtherPattern =
-  /Would you like to explore how\s+(.+?)\s+applies to this leadership lesson\?/gi;
+const questionExplorePattern =
+  /Would you like to explore how\s+(.+?)\s+applies to this leadership lesson\?/i;
+
+const approvedFollowUpOptions = [
+  'Integrity',
+  'Influence',
+  'Wisdom Under Pressure',
+  'Courage',
+  'Stewardship',
+  'Discipline',
+  'Vision',
+  'Humility',
+  'Obedience',
+  'Responsibility',
+  'Faithfulness',
+  'Servant Leadership',
+  'Counting the Cost',
+  'Decision-Making',
+  'Spiritual Maturity',
+];
 
 function createId() {
   if ('crypto' in window && typeof window.crypto.randomUUID === 'function') {
@@ -46,25 +78,234 @@ function createId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-function extractFollowUpOptions(content: string): FollowUpOptions | null {
-  const newFormatMatches = [...content.matchAll(newExploreFurtherPattern)]
-    .map((match) => match[1]?.trim())
-    .filter((option): option is string => Boolean(option));
+function cleanLine(line: string) {
+  return line.trim().replace(/\s+/g, ' ');
+}
 
-  if (newFormatMatches.length >= 2) {
+function cleanQuote(line: string) {
+  return line
+    .trim()
+    .replace(/^["“]/, '')
+    .replace(/["”]\.?$/, '')
+    .trim();
+}
+
+function findHeadingIndex(lines: string[], headings: string[]) {
+  return lines.findIndex((line) => headings.includes(line.trim()));
+}
+
+function getSectionLines(lines: string[], startIndex: number, endIndex: number) {
+  if (startIndex === -1) return [];
+
+  const safeEndIndex = endIndex === -1 ? lines.length : endIndex;
+
+  return lines
+    .slice(startIndex + 1, safeEndIndex)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function joinSection(lines: string[]) {
+  return lines.join('\n').replace(/\n{2,}/g, '\n\n').trim();
+}
+
+function parseScriptureAnchors(lines: string[]): ScriptureAnchor[] {
+  const anchors: ScriptureAnchor[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index].trim();
+
+    if (!line.startsWith('-')) continue;
+
+    const sameLineMatch = line.match(/^-\s*(.+?\bKJV)\s+[—-]\s+["“](.+?)["”]\.?$/);
+
+    if (sameLineMatch) {
+      anchors.push({
+        reference: cleanLine(sameLineMatch[1]),
+        text: cleanQuote(sameLineMatch[2]),
+      });
+      continue;
+    }
+
+    const reference = cleanLine(line.replace(/^-\s*/, ''));
+    const nextLine = lines[index + 1]?.trim() ?? '';
+
+    if (reference && nextLine && !nextLine.startsWith('-')) {
+      anchors.push({
+        reference,
+        text: cleanQuote(nextLine),
+      });
+      index += 1;
+      continue;
+    }
+
+    if (reference) {
+      anchors.push({
+        reference,
+        text: '',
+      });
+    }
+  }
+
+  return anchors.slice(0, 2);
+}
+
+function extractExploreOptionsFromLines(lines: string[]) {
+  const options = lines
+    .map((line) => {
+      const trimmed = line.replace(/^-\s*/, '').trim();
+      const questionMatch = trimmed.match(questionExplorePattern);
+
+      if (questionMatch?.[1]) {
+        return questionMatch[1].trim();
+      }
+
+      return trimmed;
+    })
+    .filter(Boolean)
+    .filter((option) => option.length <= 40)
+    .map((option) => option.replace(/[?.!]+$/, '').trim());
+
+  return options.slice(0, 2);
+}
+
+function extractFollowUpOptions(content: string): FollowUpOptions | null {
+  const parsed = parseCounselResponse(content);
+
+  if (parsed?.exploreOptions.length && parsed.exploreOptions.length >= 2) {
     return {
-      optionA: newFormatMatches[0],
-      optionB: newFormatMatches[1],
+      optionA: parsed.exploreOptions[0],
+      optionB: parsed.exploreOptions[1],
     };
   }
 
   const oldFormatMatch = content.match(oldExploreFurtherPattern);
+
   if (!oldFormatMatch) return null;
 
   return {
     optionA: oldFormatMatch[1].trim(),
     optionB: oldFormatMatch[2].trim(),
   };
+}
+
+function parseCounselResponse(content: string): ParsedCounselResponse | null {
+  const normalized = content.replace(/\r\n/g, '\n').trim();
+  const lines = normalized.split('\n').map((line) => line.trimEnd());
+
+  const titleIndex = lines.findIndex((line) => line.trim().startsWith('Counsel on '));
+  const scriptureIndex = findHeadingIndex(lines, ['Scripture Anchors']);
+  const principleIndex = findHeadingIndex(lines, ['The Leadership Principle', 'Leadership Principle']);
+  const applicationIndex = findHeadingIndex(lines, ['Practical Application', 'Practical Leadership Lesson']);
+  const exploreIndex = findHeadingIndex(lines, ['Explore Further']);
+
+  if (titleIndex === -1 || scriptureIndex === -1) return null;
+
+  const title = cleanLine(lines[titleIndex]);
+  const counsel = joinSection(getSectionLines(lines, titleIndex, scriptureIndex));
+  const scriptureAnchors = parseScriptureAnchors(
+    getSectionLines(lines, scriptureIndex, principleIndex),
+  );
+
+  const leadershipPrinciple = joinSection(
+    getSectionLines(lines, principleIndex, applicationIndex),
+  );
+
+  const practicalApplication = joinSection(
+    getSectionLines(lines, applicationIndex, exploreIndex),
+  );
+
+  const exploreOptions = extractExploreOptionsFromLines(getSectionLines(lines, exploreIndex, -1));
+
+  if (!title || !counsel) return null;
+
+  return {
+    title,
+    counsel,
+    scriptureAnchors,
+    leadershipPrinciple,
+    practicalApplication,
+    exploreOptions,
+  };
+}
+
+function CounselResponse({
+  content,
+  showFollowUps,
+  isLoading,
+  onFollowUpClick,
+}: {
+  content: string;
+  showFollowUps: boolean;
+  isLoading: boolean;
+  onFollowUpClick: (option: string) => void;
+}) {
+  const parsed = parseCounselResponse(content);
+
+  if (!parsed) {
+    return <p>{content}</p>;
+  }
+
+  const safeExploreOptions =
+    parsed.exploreOptions.length >= 2
+      ? parsed.exploreOptions
+      : approvedFollowUpOptions.slice(0, 2);
+
+  return (
+    <div className="counsel-response">
+      <h2>{parsed.title}</h2>
+
+      <p className="counsel-response-lead">{parsed.counsel}</p>
+
+      {parsed.scriptureAnchors.length > 0 && (
+        <section className="counsel-response-section" aria-label="Scripture anchors">
+          <span className="counsel-response-label">Scripture Anchors</span>
+
+          <div className="answer-scripture-stack">
+            {parsed.scriptureAnchors.map((anchor) => (
+              <figure key={`${anchor.reference}-${anchor.text}`} className="answer-scripture-card">
+                <figcaption>{anchor.reference}</figcaption>
+                {anchor.text ? <blockquote>“{anchor.text}”</blockquote> : null}
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {parsed.leadershipPrinciple && (
+        <section className="answer-principle-card">
+          <span>The Leadership Principle</span>
+          <p>{parsed.leadershipPrinciple}</p>
+        </section>
+      )}
+
+      {parsed.practicalApplication && (
+        <section className="answer-application-card">
+          <span>Practical Application</span>
+          <p>{parsed.practicalApplication}</p>
+        </section>
+      )}
+
+      {showFollowUps && safeExploreOptions.length >= 2 && (
+        <section className="answer-explore-card" aria-label="Explore further options">
+          <span>Explore Further</span>
+
+          <div className="follow-up-chips polished">
+            {safeExploreOptions.slice(0, 2).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => onFollowUpClick(option)}
+                disabled={isLoading}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
 }
 
 export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelProps) {
@@ -176,40 +417,39 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
         <span className="section-label">Ask Counsel</span>
         <h1 id="chat-title">Seek counsel before you move.</h1>
         <p>
-          This is not a replacement for prayer, Scripture, or wise local counsel. It is a disciplined aid for leadership clarity.
+          This is not a replacement for prayer, Scripture, or wise local counsel. It is a
+          disciplined aid for leadership clarity.
         </p>
       </div>
 
       <div className="message-list" aria-live="polite">
         {messages.map((message) => {
-          const followUpOptions =
-            message.role === 'assistant' && message.id === latestAssistantMessage?.id
-              ? latestFollowUpOptions
-              : null;
+          const isLatestAssistant =
+            message.role === 'assistant' && message.id === latestAssistantMessage?.id;
+          const showFollowUps = Boolean(
+            isLatestAssistant &&
+              message.id !== openingMessage.id &&
+              (latestFollowUpOptions || parseCounselResponse(message.content)?.exploreOptions.length),
+          );
+          const isStructuredAssistant =
+            message.role === 'assistant' &&
+            message.id !== openingMessage.id &&
+            Boolean(parseCounselResponse(message.content));
 
           return (
             <article key={message.id} className={`message-row ${message.role}`}>
-              <div className="message-bubble">
+              <div className={`message-bubble ${isStructuredAssistant ? 'structured' : ''}`}>
                 <span>{message.role === 'assistant' ? 'Counsel' : 'You'}</span>
-                <p>{message.content}</p>
 
-                {followUpOptions && (
-                  <div className="follow-up-chips" aria-label="Explore further options">
-                    <button
-                      type="button"
-                      onClick={() => handleFollowUpClick(followUpOptions.optionA)}
-                      disabled={isLoading}
-                    >
-                      {followUpOptions.optionA}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFollowUpClick(followUpOptions.optionB)}
-                      disabled={isLoading}
-                    >
-                      {followUpOptions.optionB}
-                    </button>
-                  </div>
+                {message.role === 'assistant' && message.id !== openingMessage.id ? (
+                  <CounselResponse
+                    content={message.content}
+                    showFollowUps={showFollowUps}
+                    isLoading={isLoading}
+                    onFollowUpClick={handleFollowUpClick}
+                  />
+                ) : (
+                  <p>{message.content}</p>
                 )}
               </div>
             </article>
@@ -224,6 +464,7 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
             </div>
           </article>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -231,6 +472,7 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
         <label className="sr-only" htmlFor="counsel-input">
           What do you need counsel on?
         </label>
+
         <input
           id="counsel-input"
           value={input}
@@ -239,6 +481,7 @@ export function ChatPanel({ initialPrompt, onInitialPromptConsumed }: ChatPanelP
           autoComplete="off"
           disabled={isLoading}
         />
+
         <button type="submit" disabled={isLoading || !input.trim()} aria-label="Send question">
           {isLoading ? <Loader2 className="spin" size={18} /> : <SendHorizontal size={18} />}
         </button>
