@@ -1,6 +1,5 @@
 import { Crown } from 'lucide-react';
-
-type ActiveView = 'today' | 'counsel';
+import type { ActiveView } from '../App';
 
 type HeaderProps = {
   activeView: ActiveView;
@@ -10,15 +9,21 @@ type HeaderProps = {
 export function Header({ activeView, onNavigate }: HeaderProps) {
   return (
     <header className="site-header">
-      <a className="brand-mark" href="#top" aria-label="The King’s Counsel home">
+      <button
+        className="brand-mark brand-button"
+        type="button"
+        onClick={() => onNavigate('today')}
+        aria-label="Go to Today’s Counsel"
+      >
         <span className="brand-icon" aria-hidden="true">
           <Crown size={18} strokeWidth={1.8} />
         </span>
+
         <span>
           <strong>The King’s Counsel</strong>
           <small>Leadership under authority</small>
         </span>
-      </a>
+      </button>
 
       <nav className="top-nav" aria-label="Primary navigation">
         <button
@@ -28,6 +33,7 @@ export function Header({ activeView, onNavigate }: HeaderProps) {
         >
           Today
         </button>
+
         <button
           className={activeView === 'counsel' ? 'nav-link active' : 'nav-link'}
           onClick={() => onNavigate('counsel')}
@@ -35,8 +41,13 @@ export function Header({ activeView, onNavigate }: HeaderProps) {
         >
           Ask Counsel
         </button>
-        <button className="nav-link muted" disabled type="button">
-          Series
+
+        <button
+          className={activeView === 'library' ? 'nav-link active' : 'nav-link'}
+          onClick={() => onNavigate('library')}
+          type="button"
+        >
+          Study Library
         </button>
       </nav>
     </header>
