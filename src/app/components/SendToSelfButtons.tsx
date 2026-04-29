@@ -47,22 +47,14 @@ export function SendToSelfButtons({ subject, body }: SendToSelfButtonsProps) {
     }, 1600);
   };
 
-  const handleNativeShare = async (event: MouseEvent<HTMLAnchorElement>) => {
+  const handleCopy = async (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
 
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: subject,
-          text: body,
-        });
-        return;
-      }
-
       await copyToClipboard(fullShareText);
-      markCopied('share');
+      markCopied('copy');
     } catch {
-      // User may cancel the native share sheet. No error display needed.
+      markCopied('error');
     }
   };
 
@@ -77,60 +69,51 @@ export function SendToSelfButtons({ subject, body }: SendToSelfButtonsProps) {
     }
   };
 
-  const handleCopy = async (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-
-    try {
-      await copyToClipboard(fullShareText);
-      markCopied('copy');
-    } catch {
-      markCopied('error');
-    }
-  };
-
   return (
     <section className="send-card" aria-label="Send insight to yourself">
-      <div>
+      <div className="send-card-copy">
         <span className="section-label">No storage</span>
-        <h2>Send the insight to yourself.</h2>
+        <h2>Keep a copy of this insight.</h2>
         <p>
-          Email, text, or share this counsel. The app does not create accounts, save reflections,
+          Send or copy this counsel without creating an account. The app does not save reflections
           or store user history.
         </p>
       </div>
 
-      <div className="send-actions">
-        <a href={emailUrl}>Email</a>
+      <div className="send-card-controls">
+        <div className="send-primary-actions">
+          <a href={emailUrl}>Email</a>
+          <a href={smsUrl}>Text</a>
+          <a href="#copy" onClick={handleCopy}>
+            {copiedAction === 'copy' ? 'Copied' : copiedAction === 'error' ? 'Error' : 'Copy'}
+          </a>
+        </div>
 
-        <a href={gmailUrl} target="_blank" rel="noreferrer">
-          Gmail
-        </a>
+        <details className="send-more">
+          <summary>More options</summary>
 
-        <a href={outlookUrl} target="_blank" rel="noreferrer">
-          Outlook
-        </a>
+          <div className="send-secondary-actions">
+            <a href={gmailUrl} target="_blank" rel="noreferrer">
+              Gmail
+            </a>
 
-        <a href={smsUrl}>SMS</a>
+            <a href={outlookUrl} target="_blank" rel="noreferrer">
+              Outlook
+            </a>
 
-        <a href={whatsappUrl} target="_blank" rel="noreferrer">
-          WhatsApp
-        </a>
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              WhatsApp
+            </a>
 
-        <a href={telegramUrl} target="_blank" rel="noreferrer">
-          Telegram
-        </a>
+            <a href={telegramUrl} target="_blank" rel="noreferrer">
+              Telegram
+            </a>
 
-        <a href="#share" onClick={handleNativeShare}>
-          {copiedAction === 'share' ? 'Copied' : 'Share'}
-        </a>
-
-        <a href="#copy-for-slack" onClick={handleCopyForSlack}>
-          {copiedAction === 'slack' ? 'Copied' : 'Slack Copy'}
-        </a>
-
-        <a href="#copy" onClick={handleCopy}>
-          {copiedAction === 'copy' ? 'Copied' : copiedAction === 'error' ? 'Error' : 'Copy'}
-        </a>
+            <a href="#copy-for-slack" onClick={handleCopyForSlack}>
+              {copiedAction === 'slack' ? 'Copied' : 'Slack Copy'}
+            </a>
+          </div>
+        </details>
       </div>
     </section>
   );
