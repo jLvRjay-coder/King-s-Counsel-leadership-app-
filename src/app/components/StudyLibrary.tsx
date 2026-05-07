@@ -8,7 +8,7 @@ import {
 } from '../data/studyLibrary';
 
 type WeekStatus = 'available' | 'roadmap';
-type ExpandedDayKey = `${'current' | 'selected'}-${number}-${number}`;
+type ExpandedDayKey = `${number}-${number}`;
 
 function getWeekStatus(week: StudyWeek): WeekStatus {
   return week.days && week.days.length > 0 ? 'available' : 'roadmap';
@@ -34,12 +34,20 @@ function getDayDeepDive(day: StudyDay) {
 type StudyDayCardProps = {
   day: StudyDay;
   isToday?: boolean;
+  isWeeklyReviewDay?: boolean;
   isExpanded: boolean;
   onToggle: () => void;
 };
 
-function StudyDayCard({ day, isToday = false, isExpanded, onToggle }: StudyDayCardProps) {
+function StudyDayCard({
+  day,
+  isToday = false,
+  isWeeklyReviewDay = false,
+  isExpanded,
+  onToggle,
+}: StudyDayCardProps) {
   const deepDive = getDayDeepDive(day);
+  const dayBadge = isWeeklyReviewDay ? 'Weekly Review' : 'Today';
 
   return (
     <li className={`sl-day-item ${isToday ? 'is-today' : ''} ${isExpanded ? 'is-expanded' : ''}`.trim()}>
@@ -52,7 +60,7 @@ function StudyDayCard({ day, isToday = false, isExpanded, onToggle }: StudyDayCa
         <span className="sl-day-toggle-main">
           <span className="sl-day-head">
             <span className="sl-day-number">Day {day.dayNumber}</span>
-            {isToday ? <span className="sl-today-badge">Today</span> : null}
+            {isToday ? <span className="sl-today-badge">{dayBadge}</span> : null}
           </span>
           <span className="sl-day-title">{day.title}</span>
           <span className="sl-day-reference">{day.scriptureReference}</span>
@@ -109,7 +117,11 @@ function StudyDayCard({ day, isToday = false, isExpanded, onToggle }: StudyDayCa
 
 export function StudyLibrary() {
   const today = useMemo(() => new Date(), []);
-  const { week: currentWeek, dayIndex: currentDayIndex } = useMemo(
+  const {
+    week: currentWeek,
+    dayIndex: currentDayIndex,
+    isWeeklyReviewDay,
+  } = useMemo(
     () => getCurrentStudyDay(today),
     [today],
   );
@@ -123,9 +135,16 @@ export function StudyLibrary() {
     leadershipSeries.find((week) => week.weekNumber === selectedWeekNumber) ?? currentWeek;
 
   const selectedStatus = getWeekStatus(selectedWeek);
+  const isViewingCurrentWeek = selectedWeek.weekNumber === currentWeek.weekNumber;
+  const mainPanelLabel = isViewingCurrentWeek ? 'This Week' : 'Selected Week';
 
   const toggleDay = (key: ExpandedDayKey) => {
     setExpandedDayKey((currentKey) => (currentKey === key ? null : key));
+  };
+
+  const handleWeekChange = (weekNumber: number) => {
+    setSelectedWeekNumber(weekNumber);
+    setExpandedDayKey(null);
   };
 
   return (
@@ -139,57 +158,39 @@ export function StudyLibrary() {
         </p>
       </div>
 
-      <section className="counsel-card sl-current-card" aria-labelledby="sl-current-title">
+      <section className="counsel-card sl-week-selector-card" aria-labelledby="sl-week-selector-title">
         <div className="card-heading-row">
-          <span className="section-label">Current Weekly Journey</span>
+          <span className="section-label">Choose Week</span>
           <span className="rule-line" aria-hidden="true" />
         </div>
 
-        <div className="sl-current-meta">
-          <span className="sl-week-tag">Week {currentWeek.weekNumber} of 52</span>
-          <span className="sl-leader-tag">Biblical Leader: {currentWeek.biblicalLeader}</span>
+        <div className="sl-week-selector-row">
+          <label className="sl-week-selector-label" htmlFor="sl-week-selector">
+            <span id="sl-week-selector-title">Study Week</span>
+          </label>
+          <select
+            id="sl-week-selector"
+            className="sl-week-selector"
+            value={selectedWeekNumber}
+            onChange={(event) => handleWeekChange(Number(event.target.value))}
+          >
+            {leadershipSeries.map((week) => (
+              <option key={week.weekNumber} value={week.weekNumber}>
+                Week {week.weekNumber}: {week.theme}
+              </option>
+            ))}
+          </select>
         </div>
-
-        <h2 id="sl-current-title">{currentWeek.theme}</h2>
-
-        <p className="sl-weekly-aim">
-          <strong>Weekly Aim:</strong> {currentWeek.weeklyAim}
-        </p>
-
-        <p className="sl-weekly-summary">{currentWeek.summary}</p>
-
-        {currentWeek.days.length > 0 ? (
-          <ol className="sl-day-list" aria-label="Seven-day breakdown of the current week">
-            {currentWeek.days.map((day, index) => {
-              const isToday = index === currentDayIndex;
-              const dayKey: ExpandedDayKey = `current-${currentWeek.weekNumber}-${day.dayNumber}`;
-              return (
-                <StudyDayCard
-                  key={day.dayNumber}
-                  day={day}
-                  isToday={isToday}
-                  isExpanded={expandedDayKey === dayKey}
-                  onToggle={() => toggleDay(dayKey)}
-                />
-              );
-            })}
-          </ol>
-        ) : (
-          <p className="sl-roadmap-note">
-            This week is on the roadmap. Daily lessons are being prepared and will appear here as
-            the series rolls out.
-          </p>
-        )}
       </section>
 
       <section className="counsel-card sl-selected-card" aria-labelledby="sl-selected-title">
         <div className="card-heading-row">
-          <span className="section-label">Selected Week</span>
+          <span className="section-label">{mainPanelLabel}</span>
           <span className="rule-line" aria-hidden="true" />
         </div>
 
         <div className="sl-current-meta">
-          <span className="sl-week-tag">Week {selectedWeek.weekNumber}</span>
+          <span className="sl-week-tag">Week {selectedWeek.weekNumber} of 52</span>
           <span
             className={`sl-status-badge ${selectedStatus === 'available' ? 'is-available' : 'is-roadmap'}`}
           >
@@ -206,12 +207,15 @@ export function StudyLibrary() {
 
         {selectedStatus === 'available' ? (
           <ol className="sl-day-list" aria-label="Seven-day breakdown of the selected week">
-            {selectedWeek.days.map((day) => {
-              const dayKey: ExpandedDayKey = `selected-${selectedWeek.weekNumber}-${day.dayNumber}`;
+            {selectedWeek.days.map((day, index) => {
+              const isToday = isViewingCurrentWeek && index === currentDayIndex;
+              const dayKey: ExpandedDayKey = `${selectedWeek.weekNumber}-${day.dayNumber}`;
               return (
                 <StudyDayCard
                   key={day.dayNumber}
                   day={day}
+                  isToday={isToday}
+                  isWeeklyReviewDay={isToday && isWeeklyReviewDay}
                   isExpanded={expandedDayKey === dayKey}
                   onToggle={() => toggleDay(dayKey)}
                 />
@@ -252,7 +256,7 @@ export function StudyLibrary() {
                 key={week.weekNumber}
                 type="button"
                 className={`sl-series-card-item ${status === 'available' ? 'is-available' : 'is-roadmap'} ${isSelected ? 'is-selected' : ''} ${isCurrent ? 'is-current' : ''}`.trim()}
-                onClick={() => setSelectedWeekNumber(week.weekNumber)}
+                onClick={() => handleWeekChange(week.weekNumber)}
                 aria-pressed={isSelected}
               >
                 <div className="sl-series-card-head">

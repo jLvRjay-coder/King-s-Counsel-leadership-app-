@@ -856,6 +856,7 @@ button:disabled {
 }
 
 .sl-current-card,
+.sl-week-selector-card,
 .sl-selected-card,
 .sl-series-card,
 .sl-leaders-card {
@@ -1171,6 +1172,40 @@ button:disabled {
   font-size: 0.94rem;
 }
 
+.sl-week-selector-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.sl-week-selector-label {
+  color: var(--gold);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sl-week-selector {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(169, 130, 55, 0.24);
+  background: rgba(255, 252, 246, 0.8);
+  color: var(--slate);
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 700;
+  box-shadow: 0 14px 32px rgba(48, 38, 21, 0.08);
+}
+
+.sl-week-selector:focus {
+  outline: 2px solid rgba(169, 130, 55, 0.42);
+  outline-offset: 3px;
+}
+
 @media (max-width: 720px) {
   .sl-series-grid,
   .sl-leader-grid {
@@ -1191,6 +1226,10 @@ button:disabled {
 
   .sl-leader-card h3 {
     font-size: 1.4rem;
+  }
+
+  .sl-week-selector-row {
+    grid-template-columns: 1fr;
   }
 }
 

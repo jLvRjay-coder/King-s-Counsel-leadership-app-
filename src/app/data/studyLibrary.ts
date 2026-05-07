@@ -1112,13 +1112,24 @@ function getLocalDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
+function getMondayStartDate(date: Date) {
+  const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const mondayBasedDayIndex = (localDate.getDay() + 6) % 7;
+  localDate.setDate(localDate.getDate() - mondayBasedDayIndex);
+  return localDate;
+}
+
 function getDaysSinceStart(date: Date) {
   const start = new Date(`${ROTATION_START_DATE}T00:00:00`);
-  const startKey = getLocalDateKey(start);
+  const startKey = getLocalDateKey(getMondayStartDate(start));
   const todayKey = getLocalDateKey(date);
   const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
   return Math.max(0, Math.floor((todayKey - startKey) / millisecondsPerDay));
+}
+
+function getMondayBasedDayIndex(date: Date) {
+  return (date.getDay() + 6) % 7;
 }
 
 export function getCurrentStudyWeek(date: Date = new Date()): StudyWeek {
@@ -1132,10 +1143,12 @@ export function getCurrentStudyDay(date: Date = new Date()): {
   day: StudyDay;
   weekIndex: number;
   dayIndex: number;
+  isWeeklyReviewDay: boolean;
 } {
   const daysElapsed = getDaysSinceStart(date);
   const weekIndex = Math.floor(daysElapsed / 7) % 52;
-  const dayIndex = daysElapsed % 7;
+  const dayIndex = getMondayBasedDayIndex(date);
+  const isWeeklyReviewDay = dayIndex === 6;
 
   let week = leadershipSeries[weekIndex];
 
@@ -1149,6 +1162,7 @@ export function getCurrentStudyDay(date: Date = new Date()): {
       day: fallbackDay,
       weekIndex,
       dayIndex,
+      isWeeklyReviewDay,
     };
   }
 
@@ -1159,6 +1173,7 @@ export function getCurrentStudyDay(date: Date = new Date()): {
     day,
     weekIndex,
     dayIndex,
+    isWeeklyReviewDay,
   };
 }
 
