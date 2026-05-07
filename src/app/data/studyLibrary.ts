@@ -662,7 +662,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Examine influence as stewardship rather than status.',
     biblicalLeader: 'Daniel',
     summary:
-      'Influence is the weight a leader carries with others. It must be earned with integrity and used for their good.',
+      'Influence is not the ability to impress a room; it is the moral weight a leader carries when people learn they can trust him. Daniel shows influence formed through conviction, excellence, and usefulness inside a system he refused to worship.',
   },
   {
     weekNumber: 6,
@@ -670,7 +670,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Train the leader to be reliable in small and unseen things over time.',
     biblicalLeader: 'Joseph',
     summary:
-      'Faithfulness is the slow, steady obedience that prepares a leader for greater responsibility.',
+      'Faithfulness is the long obedience that keeps showing up before promotion, visibility, or explanation arrives. Joseph teaches leaders how hidden integrity prepares them for public responsibility without letting bitterness own the story.',
   },
   {
     weekNumber: 7,
@@ -678,7 +678,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Pursue wisdom as a working leadership discipline, not an abstract idea.',
     biblicalLeader: 'Solomon',
     summary:
-      'Wisdom is the skill of applying truth to actual decisions, people, and pressures.',
+      'Wisdom is truth made skillful under real pressure. Solomon reveals both the gift and the danger of wisdom: a leader must ask for it, practice it, and keep his heart submitted to the God who gives it.',
   },
   {
     weekNumber: 8,
@@ -686,7 +686,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Build the inner discipline that protects long-term leadership.',
     biblicalLeader: 'Paul',
     summary:
-      'Discipline is the daily order that keeps a leader’s appetites and habits under God.',
+      'Discipline is the quiet rule of the inner life before the public role is tested. Paul trains leaders to bring appetite, attention, speech, and effort under authority so the assignment is not sabotaged from within.',
   },
   {
     weekNumber: 9,
@@ -694,7 +694,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Form humility as the posture from which all godly leadership operates.',
     biblicalLeader: 'Moses',
     summary:
-      'Humility is not weakness. It is the leader knowing his place under God and refusing to rise above it.',
+      'Humility is not a small view of the assignment; it is a right view of the leader under God. Moses teaches that authority becomes safe when the leader knows he is a servant before he is a voice.',
   },
   {
     weekNumber: 10,
@@ -702,7 +702,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Strengthen the alignment between the leader’s private life and public role.',
     biblicalLeader: 'Daniel',
     summary:
-      'Integrity is the wholeness that allows a leader to be the same person in every room.',
+      'Integrity is the wholeness that lets a leader remain the same person when the room, reward, or threat changes. Daniel shows that private conviction must be settled before public pressure arrives.',
   },
   {
     weekNumber: 11,
@@ -710,7 +710,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Train the leader to own outcomes without blame-shifting.',
     biblicalLeader: 'Nehemiah',
     summary:
-      'Responsibility is the willingness to answer for what is in your hands, even when it is hard.',
+      'Responsibility is the willingness to answer for what God has placed in your hands without hiding behind excuses or blaming the broken wall. Nehemiah models ownership that prays honestly, plans carefully, and moves first.',
   },
   {
     weekNumber: 12,
@@ -718,7 +718,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Develop a Scripture-shaped framework for sober, timely decisions.',
     biblicalLeader: 'Solomon',
     summary:
-      'Decision-making is the leader’s ongoing test, where wisdom, courage, and humility meet.',
+      'Decision-making is where a leader\'s theology becomes visible in choices, timing, and tradeoffs. Solomon teaches leaders to seek discernment before speed and to judge matters by truth rather than pressure.',
   },
   {
     weekNumber: 13,
@@ -726,7 +726,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Cultivate obedient courage, not personality boldness.',
     biblicalLeader: 'Joshua',
     summary:
-      'Courage is acting on what God has said, even when fear is present and outcomes are uncertain.',
+      'Courage is obedience that moves because God has spoken, not because fear has disappeared. Joshua shows that leaders do not need perfect confidence; they need settled trust in the command and presence of God.',
   },
   {
     weekNumber: 14,
@@ -734,7 +734,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead through clear, truthful, and disciplined speech.',
     biblicalLeader: 'Paul',
     summary:
-      'Communication is the careful use of words to build people up and clarify the work.',
+      'Communication is the stewardship of words for clarity, courage, correction, and comfort. Paul shows leaders how to speak truth with weight, aim speech toward edification, and refuse manipulation as a leadership tool.',
   },
   {
     weekNumber: 15,
@@ -742,7 +742,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Build the steady character that does not change with circumstances.',
     biblicalLeader: 'Daniel',
     summary:
-      'Consistency is the leader’s sameness over time that makes him trustworthy under pressure.',
+      'Consistency is the repeated faithfulness that teaches people a leader can be trusted when conditions change. Daniel\'s decades of steady obedience show that credibility is built by patterns, not moments.',
   },
   {
     weekNumber: 16,
@@ -750,7 +750,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Stay teachable as a continual leadership habit.',
     biblicalLeader: 'Apollos',
     summary:
-      'Growth is the leader’s lifelong willingness to be corrected, sharpened, and stretched.',
+      'Growth is the humility to keep being formed even when you are already gifted. Apollos reminds leaders that ability is not maturity, and correction can become a doorway into greater usefulness.',
   },
   {
     weekNumber: 17,
@@ -758,7 +758,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead as a manager of what God has entrusted, not as an owner.',
     biblicalLeader: 'Joseph',
     summary:
-      'Stewardship is the conviction that everything in the leader’s hands belongs to God first.',
+      'Stewardship begins when a leader treats authority, resources, time, and people as trusts from God rather than possessions. Joseph shows that faithful management in another person\'s house prepares a leader for wider responsibility.',
   },
   {
     weekNumber: 18,
@@ -766,7 +766,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Build leaders who function inside a team without dominating or hiding.',
     biblicalLeader: 'Nehemiah',
     summary:
-      'Teamwork is the disciplined coordination of gifts toward a shared, God-honoring outcome.',
+      'Teamwork is coordinated responsibility under a shared assignment. Nehemiah shows how leaders give people clear portions of the wall, dignify their work, and keep the mission stronger than individual preference.',
   },
   {
     weekNumber: 19,
@@ -774,7 +774,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Earn and protect the trust required to lead long-term.',
     biblicalLeader: 'David',
     summary:
-      'Trust is built slowly through truth, follow-through, and care, and lost quickly through compromise.',
+      'Trust is built slowly through truth, restraint, courage, repentance, and care. David teaches both sides of trust: how it is earned in hidden fields and how quickly it is damaged when a leader misuses power.',
   },
   {
     weekNumber: 20,
@@ -782,7 +782,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Pursue excellence as worship, not perfectionism.',
     biblicalLeader: 'Bezalel',
     summary:
-      'Excellence is doing the work as unto the Lord, not as performance for people.',
+      'Excellence is skilled work offered to God before it is evaluated by people. Bezalel shows leaders that craftsmanship, preparation, beauty, and precision can become worship when they serve the Lord\'s purpose.',
   },
   {
     weekNumber: 21,
@@ -790,7 +790,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Submit leadership to honest accountability before consequences force it.',
     biblicalLeader: 'David',
     summary:
-      'Accountability is the leader’s willingness to be known, corrected, and adjusted by trustworthy voices.',
+      'Accountability is the grace of being known, questioned, corrected, and restored before secrecy hardens into ruin. David\'s confrontation by Nathan shows why leaders need truthful voices with permission to enter the room.',
   },
   {
     weekNumber: 22,
@@ -798,7 +798,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead steadily through delay without abandoning the assignment.',
     biblicalLeader: 'Abraham',
     summary:
-      'Patience is the long endurance that keeps the leader faithful while God’s timing unfolds.',
+      'Patience is faith stretched across time without taking the promise back into your own hands. Abraham teaches leaders to wait under God\'s timing, and also warns how impatience can produce consequences leadership must carry.',
   },
   {
     weekNumber: 23,
@@ -806,7 +806,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Honor preparation as part of the assignment, not an interruption to it.',
     biblicalLeader: 'David',
     summary:
-      'Preparation is the unseen labor that makes the public moment possible and durable.',
+      'Preparation is the hidden formation that makes public courage possible. David\'s field, flock, harp, and sling reveal that God often trains leaders privately before placing them in visible conflict.',
   },
   {
     weekNumber: 24,
@@ -814,7 +814,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Anchor leadership in real, ongoing prayer rather than crisis prayer.',
     biblicalLeader: 'Jesus',
     summary:
-      'Prayer is the leader’s primary work, where vision, decisions, and people are first carried.',
+      'Prayer is not a leadership accessory; it is the place where the leader returns authority, people, decisions, and outcomes to God. Jesus shows that public ministry must be sustained by private communion with the Father.',
   },
   {
     weekNumber: 25,
@@ -822,7 +822,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Endure resistance and discouragement without quitting the assignment.',
     biblicalLeader: 'Paul',
     summary:
-      'Persistence is the long obedience that carries a leader through opposition and fatigue.',
+      'Persistence is obedience that keeps moving when opposition, weariness, and delay try to redefine the assignment. Paul teaches leaders to endure hardship without letting hardship become their identity.',
   },
   {
     weekNumber: 26,
@@ -830,7 +830,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead with informed compassion, not sentimentality.',
     biblicalLeader: 'Jesus',
     summary:
-      'Empathy is the leader’s willingness to understand the weight others carry without losing direction.',
+      'Empathy is the strength to see the person in front of you without surrendering truth or direction. Jesus shows leaders how compassion can move toward pain, name reality, and still call people into obedience.',
   },
   {
     weekNumber: 27,
@@ -838,7 +838,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Address conflict early, truthfully, and with the people involved.',
     biblicalLeader: 'Paul',
     summary:
-      'Conflict resolution is the disciplined work of restoring clarity and trust between people.',
+      'Conflict resolution is the disciplined pursuit of truth, peace, repentance, and restored usefulness. Paul models a leadership courage that addresses division directly without turning people into enemies.',
   },
   {
     weekNumber: 28,
@@ -846,7 +846,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Invest deliberately in the next generation of leaders.',
     biblicalLeader: 'Paul',
     summary:
-      'Mentorship is the deliberate transfer of conviction, skill, and counsel into others.',
+      'Mentorship is intentional transfer: doctrine, courage, habits, judgment, and endurance passed from one faithful life into another. Paul and Timothy show that leaders must reproduce conviction, not merely delegate tasks.',
   },
   {
     weekNumber: 29,
@@ -854,7 +854,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Release responsibility wisely without abandoning oversight.',
     biblicalLeader: 'Moses',
     summary:
-      'Delegation is the leader entrusting the right work to the right people with clear authority and accountability.',
+      'Delegation is the humble recognition that the assignment is bigger than one leader\'s hands. Moses learns to entrust real responsibility to capable people while keeping the mission ordered under God.',
   },
   {
     weekNumber: 30,
@@ -862,7 +862,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Govern speech, appetite, and reaction under pressure.',
     biblicalLeader: 'Paul',
     summary:
-      'Self-control is the inner rule that prevents the leader from becoming his own worst threat.',
+      'Self-control is the Spirit-formed rule of the leader\'s appetites, reactions, and impulses. Paul teaches that a leader who cannot govern himself will eventually damage what he has been trusted to lead.',
   },
   {
     weekNumber: 31,
@@ -870,7 +870,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Cultivate gratitude as a leadership posture against entitlement.',
     biblicalLeader: 'David',
     summary:
-      'Gratitude orients the leader to God’s grace and keeps pride from quietly taking root.',
+      'Gratitude keeps leadership from becoming entitlement. David\'s worship trains leaders to remember that authority, provision, victory, and mercy are received before they are stewarded.',
   },
   {
     weekNumber: 32,
@@ -878,7 +878,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Anchor leadership in God-given purpose, not borrowed ambition.',
     biblicalLeader: 'Paul',
     summary:
-      'Purpose is the settled understanding of why the leader is doing what he is doing before God.',
+      'Purpose is the settled why beneath the visible work. Paul shows leaders how a God-given assignment clarifies sacrifice, filters distraction, and keeps suffering from making the mission feel meaningless.',
   },
   {
     weekNumber: 33,
@@ -886,7 +886,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Recover wisely from setbacks without becoming hardened.',
     biblicalLeader: 'David',
     summary:
-      'Resilience is the leader’s capacity to return to the work after failure, loss, or attack.',
+      'Resilience is the grace-shaped capacity to return to God and the work after loss, failure, betrayal, or exhaustion. David teaches leaders to grieve honestly without letting the wound become the throne.',
   },
   {
     weekNumber: 34,
@@ -894,7 +894,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Protect attention from drift, distraction, and noise.',
     biblicalLeader: 'Nehemiah',
     summary:
-      'Focus is the discipline of staying with the assignment when many voices try to pull the leader away.',
+      'Focus is protected attention under assignment. Nehemiah shows leaders how to answer distraction, accusation, and noise without leaving the wall God has called them to build.',
   },
   {
     weekNumber: 35,
@@ -902,7 +902,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Plan with prayerful intentionality and held expectations.',
     biblicalLeader: 'Nehemiah',
     summary:
-      'Planning is the careful arrangement of next steps under God’s direction, held with open hands.',
+      'Planning is faith made concrete through ordered steps, honest costs, and sober timing. Nehemiah teaches leaders to pray deeply, inspect reality, and prepare well without pretending the plan replaces dependence on God.',
   },
   {
     weekNumber: 36,
@@ -910,7 +910,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead with open-handed generosity in time, attention, and resources.',
     biblicalLeader: 'Barnabas',
     summary:
-      'Generosity reflects God’s own character and breaks the grip of self-interest in leadership.',
+      'Generosity loosens the grip of self-protection and turns leadership outward. Barnabas shows that encouragement, advocacy, resources, and opportunity can all become gifts that strengthen other people\'s callings.',
   },
   {
     weekNumber: 37,
@@ -918,7 +918,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Become a leader who hears people and Scripture before he speaks.',
     biblicalLeader: 'James',
     summary:
-      'Listening is the active discipline of hearing carefully before forming or sharing a response.',
+      'Listening is disciplined humility before speaking, deciding, correcting, or leading. James trains leaders to slow the tongue, receive truth, and hear people carefully enough to respond with wisdom rather than reaction.',
   },
   {
     weekNumber: 38,
@@ -926,7 +926,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Treat every person under your leadership with God-grounded respect.',
     biblicalLeader: 'Paul',
     summary:
-      'Respect honors the image of God in every person the leader leads, regardless of position.',
+      'Respect is the refusal to reduce people to usefulness, weakness, title, or trouble. Paul teaches leaders to honor the image of God in every person while still speaking truth and holding the community to maturity.',
   },
   {
     weekNumber: 39,
@@ -934,7 +934,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Keep wisdom, faith, and integrity intact under high stress.',
     biblicalLeader: 'David',
     summary:
-      'Pressure exposes what a leader truly trusts and reveals where formation is still needed.',
+      'Pressure reveals what a leader trusts when the options narrow and the cost rises. David\'s wilderness years teach leaders how fear, opportunity, restraint, and worship all surface when the pressure is real.',
   },
   {
     weekNumber: 40,
@@ -942,7 +942,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Adjust methods without compromising convictions.',
     biblicalLeader: 'Paul',
     summary:
-      'Adaptability is the leader’s ability to change approach while holding fixed truth steady.',
+      'Adaptability is the ability to adjust methods while convictions stay anchored. Paul shows leaders how to become wisely flexible for the sake of mission without negotiating away truth.',
   },
   {
     weekNumber: 41,
@@ -950,7 +950,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Build unity rooted in truth, not surface agreement.',
     biblicalLeader: 'Jesus',
     summary:
-      'Unity is the costly, deliberate work of keeping people aligned around what matters most.',
+      'Unity is not shallow agreement; it is shared allegiance to truth, love, and mission under God. Jesus teaches leaders to pursue oneness that is holy, durable, and deeper than preference.',
   },
   {
     weekNumber: 42,
@@ -958,7 +958,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Communicate vision so others can carry it with clarity.',
     biblicalLeader: 'Nehemiah',
     summary:
-      'Vision casting is the work of making the assignment plain enough for others to run with it.',
+      'Vision casting is the work of making God-given direction clear enough that others can understand, own, and enter the work. Nehemiah shows leaders how to speak from burden, evidence, timing, and trust in God\'s hand.',
   },
   {
     weekNumber: 43,
@@ -966,7 +966,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Develop people as a primary outcome of your leadership, not a side effect.',
     biblicalLeader: 'Jesus',
     summary:
-      'People development is the deliberate growth of those under your care into mature, capable servants.',
+      'People development is leadership that measures fruit not only by work completed, but by people formed. Jesus develops disciples through proximity, correction, responsibility, failure, restoration, and mission.',
   },
   {
     weekNumber: 44,
@@ -974,7 +974,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Steward time as a finite trust from God.',
     biblicalLeader: 'Paul',
     summary:
-      'Time management is the ordering of hours so the most important work actually gets done.',
+      'Time management is stewardship of a finite trust, not merely productivity technique. Paul teaches leaders to redeem the time, order priorities, and refuse drift because the days belong to God.',
   },
   {
     weekNumber: 45,
@@ -982,7 +982,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Embrace personal cost as part of God-honoring leadership.',
     biblicalLeader: 'Jesus',
     summary:
-      'Sacrifice is the willingness to lay down comfort, preference, or right for the sake of the assignment.',
+      'Sacrifice is the willingness to lay down comfort, preference, status, or right for the good of others and obedience to God. Jesus defines leadership by costly love, not protected convenience.',
   },
   {
     weekNumber: 46,
@@ -990,7 +990,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead from hope grounded in God’s character, not in circumstances.',
     biblicalLeader: 'Paul',
     summary:
-      'Hope steadies the leader when outcomes are uncertain and progress is slow.',
+      'Hope is not optimism about circumstances; it is confidence in God\'s character, promises, and final word. Paul shows leaders how hope steadies endurance when outcomes are delayed and suffering is not yet resolved.',
   },
   {
     weekNumber: 47,
@@ -998,7 +998,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead by faith in God’s word, not by sight or confidence.',
     biblicalLeader: 'Abraham',
     summary:
-      'Faith is the leader’s settled trust in what God has spoken, even when the evidence has not arrived.',
+      'Faith is trust in what God has said before the evidence has fully arrived. Abraham teaches leaders to walk by promise, build altars along the way, and keep obedience moving through uncertainty.',
   },
   {
     weekNumber: 48,
@@ -1006,7 +1006,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Pursue justice in decisions, treatment, and use of authority.',
     biblicalLeader: 'Moses',
     summary:
-      'Justice is doing right by people in a way that reflects God’s righteousness and care for the weak.',
+      'Justice is authority used to do right before God, especially where people are vulnerable to power. Moses teaches leaders to judge fairly, refuse partiality, and remember that leadership answers to the righteous Judge.',
   },
   {
     weekNumber: 49,
@@ -1014,7 +1014,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead primarily by the life others can see, not the words they hear.',
     biblicalLeader: 'Paul',
     summary:
-      'Influence through example is the slow, durable leadership that shapes others by what they observe.',
+      'Influence through example is the credibility of a life that can be watched closely. Paul teaches leaders that instruction gains weight when conduct, endurance, purity, work, and love make the message visible.',
   },
   {
     weekNumber: 50,
@@ -1022,7 +1022,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Renew strength, vision, and devotion before depletion forces it.',
     biblicalLeader: 'Elijah',
     summary:
-      'Renewal is the disciplined return to God for rest, perspective, and fresh resolve.',
+      'Renewal is the return to God for rest, perspective, nourishment, correction, and fresh obedience. Elijah shows leaders that depletion must be met with God\'s care and God\'s voice, not shame or frantic striving.',
   },
   {
     weekNumber: 51,
@@ -1030,7 +1030,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Lead with what you will leave behind clearly in view.',
     biblicalLeader: 'David',
     summary:
-      'Legacy is the long shadow of a leader’s life — the people, principles, and patterns that outlive him.',
+      'Legacy is the long shadow of a leader\'s convictions, decisions, failures, repentance, and investments. David teaches leaders to think beyond the present role and prepare what future stewards will need.',
   },
   {
     weekNumber: 52,
@@ -1038,7 +1038,7 @@ const remainingWeeks: WeekRoadmapEntry[] = [
     weeklyAim: 'Aim leadership at multiplying other faithful leaders.',
     biblicalLeader: 'Paul',
     summary:
-      'Multiplication is the final test of leadership — whether it produces more godly leaders, not just followers.',
+      'Multiplication is leadership that produces faithful leaders, not permanent dependence. Paul teaches that the work is healthier when truth is entrusted to reliable people who can teach and carry it forward.',
   },
 ];
 

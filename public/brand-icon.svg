@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">The King's Counsel placeholder brand icon</title>
+  <desc id="desc">A navy and gold crown mark prepared for The King's Counsel app branding.</desc>
+  <rect width="512" height="512" rx="112" fill="#17202a"/>
+  <circle cx="256" cy="256" r="174" fill="none" stroke="#d8bd7a" stroke-width="18"/>
+  <path
+    d="M153 309h206l21-129-72 56-52-86-52 86-72-56 21 129Z"
+    fill="#d8bd7a"
+    stroke="#f8f4ea"
+    stroke-linejoin="round"
+    stroke-width="10"
+  />
+  <path d="M168 340h176" stroke="#f8f4ea" stroke-linecap="round" stroke-width="18"/>
+  <path d="M209 282h94" stroke="#17202a" stroke-linecap="round" stroke-width="14" opacity=".72"/>
+</svg>

@@ -67,7 +67,7 @@ function StudyDayCard({
           <span className="sl-day-principle">{day.leadershipPrinciple}</span>
         </span>
         <span className="sl-expand-indicator" aria-hidden="true">
-          {isExpanded ? 'Close' : 'Study'}
+          {isExpanded ? 'Close' : 'Dive Deeper'}
         </span>
       </button>
 
