@@ -8,6 +8,14 @@ export type StudyDay = {
   reflectionPrompt: string;
   actionStep: string;
   exploreFurther: string[];
+  deepDive?: {
+    scriptureContext: string[];
+    leadershipBreakdown: string[];
+    leadershipPrinciple: string;
+    practicalApplication: string[];
+    reflection: string;
+    action: string;
+  };
 };
 
 export type StudyWeek = {
@@ -219,6 +227,30 @@ const week2Calling: StudyWeek = {
       actionStep:
         'Write down one specific area where the assignment is bigger than you, and bring it to God in prayer rather than to your own strength.',
       exploreFurther: ['Calling and weakness', 'Why God assigns what we cannot finish alone'],
+      deepDive: {
+        scriptureContext: [
+          'Exodus 3:11-4:14 shows Moses standing before God with a real assignment and a shrinking sense of capacity. God does not shame Moses for feeling small, but He does not release Moses from the call either.',
+          'The passage moves through five excuses. Each one reveals a common leadership fear: identity, theology, credibility, ability, and finally willingness.',
+        ],
+        leadershipBreakdown: [
+          'Excuse One: Who am I? Exodus 3:11-12. God answers, It does not matter who you are; I am with you.',
+          'Excuse Two: Who are You? Exodus 3:13-14. God answers, I AM THAT I AM; I am everything you need.',
+          'Excuse Three: What if they do not listen? Exodus 4:1-9. God answers, When I am finished, they will listen.',
+          'Excuse Four: I have never been a good speaker. Exodus 4:10-12. God answers, Who made man\'s mouth?',
+          'Excuse Five: Send someone else. Exodus 4:13-14. God answers, Aaron will help, but Moses is still called to go.',
+        ],
+        leadershipPrinciple:
+          'Calling is not confirmed by the leader feeling sufficient. It is confirmed by God\'s presence, God\'s name, God\'s power, God\'s design, and God\'s refusal to remove the assignment when the leader feels afraid.',
+        practicalApplication: [
+          'When you feel too small, do not make your identity the center of the decision. Ask whether God is with you in the assignment.',
+          'When you fear others will question you, return to who God has revealed Himself to be before you rehearse what people might say.',
+          'When you feel under-equipped, bring the limitation honestly to God, then take the next obedient step with the help He provides.',
+        ],
+        reflection:
+          'Which of Moses\' five excuses sounds most like the one I use when God asks me to obey?',
+        action:
+          'Name the excuse, write the corresponding answer God gives Moses, and take one concrete step today as though God\'s answer is true.',
+      },
     },
     {
       dayNumber: 3,

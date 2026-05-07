@@ -3,13 +3,108 @@ import {
   biblicalLeaders,
   getCurrentStudyDay,
   leadershipSeries,
+  type StudyDay,
   type StudyWeek,
 } from '../data/studyLibrary';
 
 type WeekStatus = 'available' | 'roadmap';
+type ExpandedDayKey = `${'current' | 'selected'}-${number}-${number}`;
 
 function getWeekStatus(week: StudyWeek): WeekStatus {
   return week.days && week.days.length > 0 ? 'available' : 'roadmap';
+}
+
+function getDayDeepDive(day: StudyDay) {
+  return (
+    day.deepDive ?? {
+      scriptureContext: [day.scriptureText],
+      leadershipBreakdown: day.teaching,
+      leadershipPrinciple: day.leadershipPrinciple,
+      practicalApplication: [
+        day.exploreFurther.length > 0
+          ? `Explore further: ${day.exploreFurther.join(', ')}.`
+          : day.actionStep,
+      ],
+      reflection: day.reflectionPrompt,
+      action: day.actionStep,
+    }
+  );
+}
+
+type StudyDayCardProps = {
+  day: StudyDay;
+  isToday?: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+};
+
+function StudyDayCard({ day, isToday = false, isExpanded, onToggle }: StudyDayCardProps) {
+  const deepDive = getDayDeepDive(day);
+
+  return (
+    <li className={`sl-day-item ${isToday ? 'is-today' : ''} ${isExpanded ? 'is-expanded' : ''}`.trim()}>
+      <button
+        className="sl-day-toggle"
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+      >
+        <span className="sl-day-toggle-main">
+          <span className="sl-day-head">
+            <span className="sl-day-number">Day {day.dayNumber}</span>
+            {isToday ? <span className="sl-today-badge">Today</span> : null}
+          </span>
+          <span className="sl-day-title">{day.title}</span>
+          <span className="sl-day-reference">{day.scriptureReference}</span>
+          <span className="sl-day-principle">{day.leadershipPrinciple}</span>
+        </span>
+        <span className="sl-expand-indicator" aria-hidden="true">
+          {isExpanded ? 'Close' : 'Study'}
+        </span>
+      </button>
+
+      {isExpanded ? (
+        <div className="sl-deep-dive">
+          <section className="sl-deep-section">
+            <h4>Scripture Context</h4>
+            {deepDive.scriptureContext.map((item) => (
+              <p key={item}>{item}</p>
+            ))}
+          </section>
+
+          <section className="sl-deep-section">
+            <h4>Leadership Breakdown</h4>
+            <ul className="sl-deep-list">
+              {deepDive.leadershipBreakdown.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="sl-deep-section sl-deep-principle">
+            <h4>The Leadership Principle</h4>
+            <p>{deepDive.leadershipPrinciple}</p>
+          </section>
+
+          <section className="sl-deep-section">
+            <h4>Practical Application</h4>
+            {deepDive.practicalApplication.map((item) => (
+              <p key={item}>{item}</p>
+            ))}
+          </section>
+
+          <div className="sl-day-detail sl-deep-actions">
+            <p>
+              <strong>Reflection:</strong> {deepDive.reflection}
+            </p>
+            <p>
+              <strong>Action:</strong> {deepDive.action}
+            </p>
+          </div>
+        </div>
+      ) : null}
+    </li>
+  );
 }
 
 export function StudyLibrary() {
@@ -22,11 +117,16 @@ export function StudyLibrary() {
   const [selectedWeekNumber, setSelectedWeekNumber] = useState<number>(
     currentWeek.weekNumber,
   );
+  const [expandedDayKey, setExpandedDayKey] = useState<ExpandedDayKey | null>(null);
 
   const selectedWeek =
     leadershipSeries.find((week) => week.weekNumber === selectedWeekNumber) ?? currentWeek;
 
   const selectedStatus = getWeekStatus(selectedWeek);
+
+  const toggleDay = (key: ExpandedDayKey) => {
+    setExpandedDayKey((currentKey) => (currentKey === key ? null : key));
+  };
 
   return (
     <section className="page-wrap sl-shell" aria-labelledby="study-library-title">
@@ -62,19 +162,15 @@ export function StudyLibrary() {
           <ol className="sl-day-list" aria-label="Seven-day breakdown of the current week">
             {currentWeek.days.map((day, index) => {
               const isToday = index === currentDayIndex;
+              const dayKey: ExpandedDayKey = `current-${currentWeek.weekNumber}-${day.dayNumber}`;
               return (
-                <li
+                <StudyDayCard
                   key={day.dayNumber}
-                  className={`sl-day-item ${isToday ? 'is-today' : ''}`.trim()}
-                >
-                  <div className="sl-day-head">
-                    <span className="sl-day-number">Day {day.dayNumber}</span>
-                    {isToday ? <span className="sl-today-badge">Today</span> : null}
-                  </div>
-                  <h3 className="sl-day-title">{day.title}</h3>
-                  <p className="sl-day-reference">{day.scriptureReference}</p>
-                  <p className="sl-day-principle">{day.leadershipPrinciple}</p>
-                </li>
+                  day={day}
+                  isToday={isToday}
+                  isExpanded={expandedDayKey === dayKey}
+                  onToggle={() => toggleDay(dayKey)}
+                />
               );
             })}
           </ol>
@@ -110,24 +206,17 @@ export function StudyLibrary() {
 
         {selectedStatus === 'available' ? (
           <ol className="sl-day-list" aria-label="Seven-day breakdown of the selected week">
-            {selectedWeek.days.map((day) => (
-              <li key={day.dayNumber} className="sl-day-item">
-                <div className="sl-day-head">
-                  <span className="sl-day-number">Day {day.dayNumber}</span>
-                </div>
-                <h3 className="sl-day-title">{day.title}</h3>
-                <p className="sl-day-reference">{day.scriptureReference}</p>
-                <p className="sl-day-principle">{day.leadershipPrinciple}</p>
-                <div className="sl-day-detail">
-                  <p>
-                    <strong>Reflect:</strong> {day.reflectionPrompt}
-                  </p>
-                  <p>
-                    <strong>Action:</strong> {day.actionStep}
-                  </p>
-                </div>
-              </li>
-            ))}
+            {selectedWeek.days.map((day) => {
+              const dayKey: ExpandedDayKey = `selected-${selectedWeek.weekNumber}-${day.dayNumber}`;
+              return (
+                <StudyDayCard
+                  key={day.dayNumber}
+                  day={day}
+                  isExpanded={expandedDayKey === dayKey}
+                  onToggle={() => toggleDay(dayKey)}
+                />
+              );
+            })}
           </ol>
         ) : (
           <div className="sl-roadmap-state">
