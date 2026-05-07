@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BookOpen, Download, MessageSquareText, ShieldCheck } from 'lucide-react';
 import { todaysCounsel } from '../data/todaysCounsel';
 import { CounselCard } from './CounselCard';
 import { ReflectionBlock } from './ReflectionBlock';
@@ -7,10 +7,12 @@ import { SendToSelfButtons } from './SendToSelfButtons';
 
 type HomePageProps = {
   onAskCounsel: (prompt?: string) => void;
+  onOpenLibrary: () => void;
 };
 
-export function HomePage({ onAskCounsel }: HomePageProps) {
+export function HomePage({ onAskCounsel, onOpenLibrary }: HomePageProps) {
   const [question, setQuestion] = useState('');
+  const appUrl = window.location.origin;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,6 +26,13 @@ export function HomePage({ onAskCounsel }: HomePageProps) {
     `Leadership Principle: ${todaysCounsel.leadershipPrinciple}`,
     'Reflection:',
     ...todaysCounsel.reflectionPrompts.map((prompt) => `- ${prompt}`),
+  ].join('\n\n');
+
+  const askAboutTodayPrompt = [
+    `Help me apply today's counsel: ${todaysCounsel.title}.`,
+    `Scripture: ${todaysCounsel.scriptureReference}.`,
+    `Leadership principle: ${todaysCounsel.leadershipPrinciple}`,
+    'Ask me the right questions and give me Scripture-aligned counsel for the leadership decision in front of me.',
   ].join('\n\n');
 
   return (
@@ -40,12 +49,38 @@ export function HomePage({ onAskCounsel }: HomePageProps) {
       <CounselCard lesson={todaysCounsel} />
       <ReflectionBlock prompts={todaysCounsel.reflectionPrompts} />
 
+      <section className="continue-card" aria-labelledby="continue-counsel-title">
+        <span className="section-label">Continue Today's Counsel</span>
+        <h2 id="continue-counsel-title">Carry this into the next faithful step.</h2>
+
+        <div className="continue-actions">
+          <button
+            className="continue-action"
+            type="button"
+            onClick={() => onAskCounsel(askAboutTodayPrompt)}
+          >
+            <MessageSquareText size={18} strokeWidth={1.9} />
+            <span>Ask Counsel About This</span>
+          </button>
+
+          <button className="continue-action" type="button" onClick={onOpenLibrary}>
+            <BookOpen size={18} strokeWidth={1.9} />
+            <span>Open Study Library</span>
+          </button>
+
+          <a className="continue-action" href={appUrl}>
+            <Download size={18} strokeWidth={1.9} />
+            <span>Download the App</span>
+          </a>
+        </div>
+      </section>
+
       <section className="ask-entry-card" aria-labelledby="ask-counsel-title">
         <div>
           <span className="section-label">Ask Counsel</span>
-          <h2 id="ask-counsel-title">Bring the decision into the light.</h2>
+          <h2 id="ask-counsel-title">Bring the Question Under Counsel</h2>
           <p>
-            Ask a leadership question and receive disciplined, Scripture-aligned counsel for the moment in front of you.
+            Ask about today's lesson or bring forward the leadership decision in front of you.
           </p>
         </div>
 

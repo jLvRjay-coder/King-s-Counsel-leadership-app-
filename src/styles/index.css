@@ -214,6 +214,7 @@ button:disabled {
 
 .counsel-card,
 .reflection-card,
+.continue-card,
 .ask-entry-card,
 .send-card,
 .chat-intro,
@@ -227,6 +228,7 @@ button:disabled {
 
 .counsel-card,
 .reflection-card,
+.continue-card,
 .ask-entry-card,
 .send-card {
   border-radius: var(--radius-lg);
@@ -248,6 +250,7 @@ button:disabled {
 
 .counsel-card h2,
 .reflection-card h2,
+.continue-card h2,
 .ask-entry-card h2,
 .send-card h2 {
   margin: 16px 0 18px;
@@ -303,6 +306,7 @@ button:disabled {
 
 .principle-block p,
 .teaching-block p,
+.continue-card p,
 .ask-entry-card p,
 .send-card p {
   color: var(--slate-soft);
@@ -359,6 +363,48 @@ button:disabled {
   color: var(--slate);
   line-height: 1.58;
   font-weight: 650;
+}
+
+.continue-card {
+  display: grid;
+  gap: 20px;
+}
+
+.continue-card h2 {
+  margin-bottom: 0;
+}
+
+.continue-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.continue-action {
+  min-height: 76px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(169, 130, 55, 0.22);
+  background:
+    linear-gradient(135deg, rgba(216, 189, 122, 0.18), rgba(255, 252, 246, 0.76)),
+    rgba(255, 252, 246, 0.78);
+  color: var(--slate);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 16px;
+  font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 14px 30px rgba(48, 38, 21, 0.08);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.continue-action:hover {
+  transform: translateY(-1px);
+  border-color: rgba(169, 130, 55, 0.42);
+  box-shadow: 0 18px 36px rgba(48, 38, 21, 0.12);
 }
 
 .ask-entry-card,
@@ -760,6 +806,10 @@ button:disabled {
   }
 
   .reflection-item {
+    grid-template-columns: 1fr;
+  }
+
+  .continue-actions {
     grid-template-columns: 1fr;
   }
 

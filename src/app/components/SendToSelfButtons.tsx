@@ -199,11 +199,13 @@ const componentStyles = `
 
 export function SendToSelfButtons({ subject, body }: SendToSelfButtonsProps) {
   const [copiedAction, setCopiedAction] = useState('');
+  const appUrl = window.location.origin;
+  const shareFooter = `Shared from The King's Counsel\n\nDownload the App:\n${appUrl}`;
 
-  const fullShareText = `${subject}\n\n${body}`;
+  const fullShareText = `${subject}\n\n${body}\n\n${shareFooter}`;
 
   const encodedSubject = encodeURIComponent(subject);
-  const encodedBody = encodeURIComponent(body);
+  const encodedBody = encodeURIComponent(`${body}\n\n${shareFooter}`);
   const encodedShareText = encodeURIComponent(fullShareText);
 
   const smsUrl = `sms:?&body=${encodedBody}`;
@@ -299,6 +301,10 @@ export function SendToSelfButtons({ subject, body }: SendToSelfButtonsProps) {
               <button className="kc-pill-button" type="button" onClick={handleCopyForSlack}>
                 {copiedAction === 'slack' ? 'Copied' : 'Slack Copy'}
               </button>
+
+              <a className="kc-pill" href={appUrl}>
+                Download the App
+              </a>
             </div>
           </details>
         </div>

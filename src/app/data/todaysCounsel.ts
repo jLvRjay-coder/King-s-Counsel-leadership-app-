@@ -38,10 +38,6 @@ function buildReflectionPrompts(day: StudyDay): string[] {
     prompts.push(day.actionStep);
   }
 
-  if (day.exploreFurther && day.exploreFurther.length > 0) {
-    prompts.push(`Explore further: ${day.exploreFurther[0]}`);
-  }
-
   // Guarantee at least one prompt so downstream UI never renders empty.
   if (prompts.length === 0) {
     prompts.push('What is the next faithful step under God in front of me today?');

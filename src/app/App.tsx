@@ -20,7 +20,7 @@ export default function App() {
 
   const renderActiveView = () => {
     if (activeView === 'today') {
-      return <HomePage onAskCounsel={openCounsel} />;
+      return <HomePage onAskCounsel={openCounsel} onOpenLibrary={() => setActiveView('library')} />;
     }
 
     if (activeView === 'counsel') {
