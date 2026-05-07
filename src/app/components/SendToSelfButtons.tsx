@@ -200,7 +200,7 @@ const componentStyles = `
 export function SendToSelfButtons({ subject, body }: SendToSelfButtonsProps) {
   const [copiedAction, setCopiedAction] = useState('');
   const appUrl = window.location.origin;
-  const shareFooter = `Shared from The King's Counsel\n\nDownload the App:\n${appUrl}`;
+  const shareFooter = `Shared from The King’s Counsel\n\nDownload the App:\n${appUrl}`;
 
   const fullShareText = `${subject}\n\n${body}\n\n${shareFooter}`;
 
